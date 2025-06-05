@@ -1,5 +1,22 @@
 # devtask-client
 
+DevTask Tracker is a productivity and collaboration web application designed to
+help software teams and individual developers effectively plan, track, and
+manage development tasks. It combines a powerful task management backend built
+with **FastAPI** and a modern, responsive frontend built with **React**,
+**Vite**, and **Tailwind CSS**.
+
+## 🌟 Features
+
+- ✅ Create, assign, and update development tasks
+- 🕒 Track estimated vs actual time spent
+- 📌 Add task dependencies and watchers
+- 📆 Set due dates with automated reminders
+- 💬 Comment on tasks (team collaboration)
+- 📊 Project dashboard for progress overview
+- 🔐 User authentication and role-based access
+- 📡 Real-time features powered by future integrations
+
 ## 📦 Tech Stack Overview
 
 | **Aspect**               | **Tool / Library**    | **Description**                            |
