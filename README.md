@@ -1,4 +1,4 @@
-# devtask-client
+# Devtask Tracker - Client
 
 DevTask Tracker is a productivity and collaboration web application designed to
 help software teams and individual developers effectively plan, track, and
