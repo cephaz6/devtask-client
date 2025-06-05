@@ -1,11 +1,15 @@
-const App = () => {
+import { Button } from "@/components/ui/button";
+
+function App() {
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-black">
-      <h1 className="font-base text text-3xl text-white">
-        Welcome to DevTask Tracker 🎊
-      </h1>
+    <div className="flex min-h-svh flex-col items-center justify-center">
+      <h1 className="text-2xl font-bold mb-4">Welcome to My App</h1>
+      <Button className="rounded-full">Click Me</Button>
+      <p className="mt-4 text-gray-700">
+        This is a simple example of a React app with Tailwind CSS.
+      </p>
     </div>
   );
-};
+}
 
 export default App;
