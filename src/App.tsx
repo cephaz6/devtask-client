@@ -1,15 +1,31 @@
-import { Button } from "@/components/ui/button";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Routes, Route } from "react-router-dom";
+import Login from "@/pages/auth/Login";
+// import Signup from "@/pages/auth/Signup";
+import Dashboard from "@/pages/dashboard/Dashboard";
+import Layout from "@/layout/Layout";
+import NotFound from "./pages/404/NotFound";
 
-function App() {
+const App = () => {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold mb-4">Welcome to My App</h1>
-      <Button className="rounded-full">Click Me</Button>
-      <p className="mt-4 text-gray-700">
-        This is a simple example of a React app with Tailwind CSS.
-      </p>
-    </div>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Routes>
+        <Route path="/" element={<Login />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <Layout>
+              <Dashboard />
+            </Layout>
+          }
+        />
+
+        {/* not found */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </ThemeProvider>
   );
-}
+};
 
 export default App;
