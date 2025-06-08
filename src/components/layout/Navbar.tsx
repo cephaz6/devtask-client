@@ -14,7 +14,7 @@ import { ModeToggle } from "./mode-toggle";
 
 const Navbar = () => {
   return (
-    <nav className="p-4 flex items-center justify-between">
+    <nav className="p-4 flex border-bm  border-gray-600 items-center justify-between">
       <p>Collapse</p>
       <div className="flex items-center gap-4">
         <Link to={"/dashboard"}>Dashboard</Link>
@@ -25,7 +25,7 @@ const Navbar = () => {
             <Avatar>
               <AvatarImage
                 className="rounded-full w-8 h-8"
-                src="https://github.com/shadcn.png"
+                src="https://media.licdn.com/dms/image/v2/D4E03AQFe77rfSZesKw/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1725513529102?e=1755129600&v=beta&t=hgSOiOLlsB7a4mvxiJT_s2eRhfZSqBRNOK8wf-exUUA"
                 alt="@shadcn"
               />
               <AvatarFallback>Cephas</AvatarFallback>

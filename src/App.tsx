@@ -1,27 +1,27 @@
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Routes, Route } from "react-router-dom";
 import Login from "@/pages/auth/Login";
-// import Signup from "@/pages/auth/Signup";
+import NotFound from "@/pages/404/NotFound";
+import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/dashboard/Dashboard";
-import Layout from "@/layout/Layout";
-import NotFound from "./pages/404/NotFound";
+import Tasks from "@/pages/dashboard/Tasks";
+import Projects from "@/pages/dashboard/Projects";
+import ThemeProvider from "./components/providers/ThemeProvider";
 
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Routes>
+        {/* Public Route */}
         <Route path="/" element={<Login />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <Layout>
-              <Dashboard />
-            </Layout>
-          }
-        />
+        {/* Protected Dashboard Layout */}
+        <Route path="/dashboard" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="projects" element={<Projects />} />
+        </Route>
 
-        {/* not found */}
+        {/* Catch-all */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ThemeProvider>
