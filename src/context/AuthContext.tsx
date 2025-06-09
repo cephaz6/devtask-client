@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (token) {
       setAuthToken(token);
       api
-        .get("/auth/me")
+        .get("/dashboard/user")
         .then((res) => setUser(res.data))
         .catch(() => logout());
     }
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { access_token } = res.data;
     localStorage.setItem("token", access_token);
     setAuthToken(access_token);
-    const userRes = await api.get("/auth/me");
+    const userRes = await api.get("/dashboard/user");
     setUser(userRes.data);
     navigate("/dashboard");
   };

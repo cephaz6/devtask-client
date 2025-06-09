@@ -22,7 +22,7 @@ import { useSidebar } from "../providers/SidebarProvider";
 import { useAuth } from "@/context/AuthContext";
 
 const Navbar = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const { collapsed, toggle } = useSidebar();
 
   return (
@@ -46,17 +46,20 @@ const Navbar = () => {
                 src="https://media.licdn.com/dms/image/v2/D4E03AQFe77rfSZesKw/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1725513529102?e=1755129600&v=beta&t=hgSOiOLlsB7a4mvxiJT_s2eRhfZSqBRNOK8wf-exUUA"
                 alt="@shadcn"
               />
-              <AvatarFallback>Cephas</AvatarFallback>
+              <AvatarFallback>{user?.full_name}</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel className="p-5">Cephas Ose</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-5">
+              {user?.full_name}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="h-[1.2rem] w-[1.2rem] mr-2" />
-              Profile
-            </DropdownMenuItem>
-
+            <Link to={"my-profile"}>
+              <DropdownMenuItem>
+                <User className="h-[1.2rem] w-[1.2rem] mr-2" />
+                Profile
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuItem>
               <UsersRound className="h-[1.2rem] w-[1.2rem] mr-2" />
               Team

@@ -17,8 +17,10 @@ import {
   Clock,
   Users,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Mock data - replace with real data from your FastAPI backend
@@ -85,7 +87,7 @@ const Dashboard = () => {
     <div className="space-y-6">
       {/* Dashboard Header */}
       <div className="flex flex-col">
-        <h1 className="text-3xl font-bold">Hey NeeL 🎊🥳</h1>
+        <h1 className="text-3xl font-bold">Hey {user?.full_name} 🎊🥳</h1>
         <p className="text-gray-600">
           Welcome back! Here's your project overview.
         </p>

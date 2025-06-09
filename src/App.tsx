@@ -9,6 +9,7 @@ import ThemeProvider from "./components/providers/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import Register from "./pages/auth/Register";
+import ProfilePage from "./pages/dashboard/Profile";
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
             <Route index element={<Dashboard />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="projects" element={<Projects />} />
+            <Route path="my-profile" element={<ProfilePage />} />
           </Route>
 
           {/* Catch-all */}
