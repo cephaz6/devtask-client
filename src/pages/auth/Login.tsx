@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { LogIn } from "lucide-react";
+import type { AxiosError } from "axios";
 
 const Login = () => {
   const { login } = useAuth();
@@ -29,9 +30,10 @@ const Login = () => {
     setError(null);
     try {
       await login(email, password);
-    } catch (err: any) {
+    } catch (err) {
+      const axiosError = err as AxiosError<{ detail?: string }>;
       const message =
-        err.response?.data?.detail || "Login failed. Please try again.";
+        axiosError.response?.data?.detail || "Login failed. Please try again.";
       setError(message);
     }
   };

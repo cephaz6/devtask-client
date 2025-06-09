@@ -19,8 +19,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "./mode-toggle";
 import { useSidebar } from "../providers/SidebarProvider";
+import { useAuth } from "@/context/AuthContext";
 
 const Navbar = () => {
+  const { logout } = useAuth();
   const { collapsed, toggle } = useSidebar();
 
   return (
@@ -63,7 +65,7 @@ const Navbar = () => {
               <DollarSign className="h-[1.2rem] w-[1.2rem] mr-2" />
               Subscription
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive">
+            <DropdownMenuItem onClick={logout} variant="destructive">
               <LogOut className="h-[1.2rem] w-[1.2rem] mr-2" />
               Logout
             </DropdownMenuItem>

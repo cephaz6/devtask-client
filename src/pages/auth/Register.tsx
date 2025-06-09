@@ -13,6 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import api from "@/lib/api";
+import { AxiosError } from "axios";
+
 // import { toast } from "@/components/ui/use-toast";
 
 const Register = () => {
@@ -21,8 +23,11 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [error, setError] = useState("");
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(""); // Clear any previous error
 
     try {
       await api.post("/auth/register", {
@@ -30,19 +35,13 @@ const Register = () => {
         password,
         full_name: fullName,
       });
-      //   toast({
-      //     title: "Success",
-      //     description: "Account created successfully!",
-      //   });
-      navigate("/");
-    } catch (err: any) {
+      navigate("/"); // Redirect on success
+    } catch (err) {
+      const axiosError = err as AxiosError<{ detail?: string }>;
       const message =
-        err.response?.data?.detail || "Registration failed. Please try again.";
-      //   toast({
-      //     variant: "destructive",
-      //     title: "Registration Error",
-      //     description: message,
-      //   });
+        axiosError.response?.data?.detail ||
+        "Registration failed. Please try again.";
+      setError(message);
     }
   };
 
@@ -57,6 +56,12 @@ const Register = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister}>
+            {error && (
+              <div className="mb-4 rounded-md bg-red-100 p-3 text-sm text-red-700 border border-red-300">
+                {error}
+              </div>
+            )}
+
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="fullName">Full Name</Label>
