@@ -9,10 +9,33 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+
+import { Alert, AlertDescription } from "../../components/ui/alert";
+
 import { Input } from "../../components/ui/input";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { LogIn } from "lucide-react";
 
 const Login = () => {
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      await login(email, password);
+    } catch (err: any) {
+      const message =
+        err.response?.data?.detail || "Login failed. Please try again.";
+      setError(message);
+    }
+  };
+
   return (
     <div className="font-base flex flex-col items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-sm shadow-lg">
@@ -24,19 +47,31 @@ const Login = () => {
             Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form>
+
+        <form onSubmit={handleSubmit}>
+          <div className="">
+            {error && (
+              <Alert className="border-0" variant="destructive">
+                <LogIn />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+          <CardContent>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  value={email}
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="tindax@example.com"
                   required
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div className="grid gap-2">
+
+              <div className="grid gap-2 mb-4">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <a
@@ -46,19 +81,27 @@ const Login = () => {
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  value={password}
+                  type="password"
+                  required
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
             </div>
-          </form>
-        </CardContent>
-        <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
-          <Button variant="outline" className="w-full">
-            Login with Google
-          </Button>
-        </CardFooter>
+          </CardContent>
+
+          <CardFooter className="flex-col gap-2">
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+            <Button type="button" variant="outline" className="w-full">
+              Login with Google
+            </Button>
+          </CardFooter>
+        </form>
+
         <CardAction className="text-center mt-4 mx-auto">
           Don't have an account?
           <Link to="/signup" className="ml-1">

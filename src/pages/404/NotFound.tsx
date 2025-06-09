@@ -5,13 +5,26 @@ import { Link } from "react-router-dom";
 
 const NotFound = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-900">404</h1>
-        <p className="mt-4 text-xl text-gray-600">Page not found</p>
+        <div>
+          <img
+            src="https://assets.dochipo.com/editor/animations/404-error/a6b2b4d8-520a-48df-aceb-e44b0f958919.gif"
+            alt=""
+            width={200}
+          />
+        </div>
+        <p className="mt-4 text-xl ">
+          🤭⛓️‍💥 <br /> Page not found
+        </p>
         <div className="mt-6">
-          <Button asChild>
-            <Link to="/">Go back home</Link>
+          <Button
+            className="rounded-l-4xl rounded-br-3xl hover:rounded-tl-3xl"
+            asChild
+          >
+            <Link to="/" className="">
+              Go back to DevTask Tracker
+            </Link>
           </Button>
         </div>
       </div>

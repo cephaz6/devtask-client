@@ -84,7 +84,7 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Dashboard Header */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col">
         <h1 className="text-3xl font-bold">Hey NeeL 🎊🥳</h1>
         <p className="text-gray-600">
           Welcome back! Here's your project overview.
@@ -129,7 +129,7 @@ const Dashboard = () => {
             {quickActions.map((action) => (
               <div
                 key={action.title}
-                className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 cursor-pointer"
+                className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 hover:text-black cursor-pointer"
                 onClick={action.action}
               >
                 <div className="flex items-center gap-3">
