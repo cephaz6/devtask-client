@@ -122,7 +122,7 @@ const TaskPage = () => {
 
   const isOwner = user.user_id === task.user_id;
   const progress = task.progress || 0;
-  const comments = task.comments || mockComments; // Use API comments if available, fallback to mock
+  const comments = task.comments || mockComments;
 
   const getPriorityConfig = (priority) => {
     switch (priority) {
