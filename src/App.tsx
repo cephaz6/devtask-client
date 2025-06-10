@@ -10,6 +10,7 @@ import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import Register from "./pages/auth/Register";
 import ProfilePage from "./pages/dashboard/Profile";
+import TaskPage from "./pages/dashboard/TaskPage";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
             <Route path="tasks" element={<Tasks />} />
             <Route path="projects" element={<Projects />} />
             <Route path="my-profile" element={<ProfilePage />} />
+            <Route path="tasks/:id" element={<TaskPage />} />
           </Route>
 
           {/* Catch-all */}

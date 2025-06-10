@@ -134,3 +134,76 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Scrollbar - No Background, Matches Dark Dashboard */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent; /* No background */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* No track background */
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  border: none;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Optional: Custom scrollbar for specific containers */
+.scrollable-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.scrollable-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* For modal or popup scrollbars (like your task creation modal) */
+.modal::-webkit-scrollbar,
+.popup::-webkit-scrollbar,
+.dialog::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal::-webkit-scrollbar-thumb,
+.popup::-webkit-scrollbar-thumb,
+.dialog::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover,
+.popup::-webkit-scrollbar-thumb:hover,
+.dialog::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

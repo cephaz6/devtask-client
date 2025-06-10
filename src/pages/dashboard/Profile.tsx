@@ -75,8 +75,8 @@ const ProfilePage: React.FC = () => {
     id: "1",
     name: "Bright Atagah",
     email: "bright.atagah@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
+    phone: "+44 (555) 123-4567",
+    location: "Manchester, United Kingdom",
     bio: "Full-stack developer passionate about creating elegant solutions to complex problems. I love working with modern web technologies and building scalable applications.",
     role: "Senior Full Stack Developer",
     department: "Engineering",
@@ -257,29 +257,17 @@ const ProfilePage: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-800/50">
-          <TabsTrigger
-            value="overview"
-            className="data-[state=active]:bg-gray-700"
-          >
+        <TabsList className="grid w-full grid-cols-4 bg-dark/50">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-dark">
             Overview
           </TabsTrigger>
-          <TabsTrigger
-            value="activity"
-            className="data-[state=active]:bg-gray-700"
-          >
+          <TabsTrigger value="activity" className="data-[state=active]:bg-dark">
             Activity
           </TabsTrigger>
-          <TabsTrigger
-            value="settings"
-            className="data-[state=active]:bg-gray-700"
-          >
+          <TabsTrigger value="settings" className="data-[state=active]:bg-dark">
             Settings
           </TabsTrigger>
-          <TabsTrigger
-            value="security"
-            className="data-[state=active]:bg-gray-700"
-          >
+          <TabsTrigger value="security" className="data-[state=active]:bg-dark">
             Security
           </TabsTrigger>
         </TabsList>
@@ -295,10 +283,11 @@ const ProfilePage: React.FC = () => {
                     <Avatar className="w-24 h-24">
                       <AvatarImage src={profile.avatar} alt={user?.full_name} />
                       <AvatarFallback className="bg-blue-600 text-white text-2xl">
-                        {user?.full_name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                        {user?.full_name ||
+                          "AA"
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                       </AvatarFallback>
                     </Avatar>
                     {isEditing && (
@@ -321,7 +310,7 @@ const ProfilePage: React.FC = () => {
                             name: e.target.value,
                           })
                         }
-                        className="text-center bg-gray-700 border-gray-600"
+                        className="text-center bg-dark border-gray-800"
                       />
                     ) : (
                       <h3 className="text-xl font-semibold text-white">
@@ -360,10 +349,7 @@ const ProfilePage: React.FC = () => {
                 {stats.map((stat, index) => {
                   const Icon = stat.icon;
                   return (
-                    <Card
-                      key={index}
-                      className="bg-gray-800/50 border-gray-700"
-                    >
+                    <Card key={index} className="bg-dark/50 border-gray-800">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div>
@@ -383,7 +369,7 @@ const ProfilePage: React.FC = () => {
               </div>
 
               {/* Bio and Skills */}
-              <Card className="bg-gray-800/50 border-gray-700">
+              <Card className="bg-dark/50 border-gray-800">
                 <CardHeader>
                   <CardTitle className="text-white">About</CardTitle>
                 </CardHeader>
@@ -398,7 +384,7 @@ const ProfilePage: React.FC = () => {
                         })
                       }
                       rows={4}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="bg-dark border-gray-800 text-white"
                     />
                   ) : (
                     <p className="text-gray-300">{profile.bio}</p>
@@ -428,7 +414,7 @@ const ProfilePage: React.FC = () => {
 
         {/* Activity Tab */}
         <TabsContent value="activity" className="space-y-6">
-          <Card className="bg-gray-800/50 border-gray-700">
+          <Card className="bg-dark/50 border-gray-800">
             <CardHeader>
               <CardTitle className="text-white">Recent Activity</CardTitle>
               <CardDescription className="text-gray-400">
@@ -442,10 +428,10 @@ const ProfilePage: React.FC = () => {
                   return (
                     <div
                       key={activity.id}
-                      className="flex items-start space-x-3 p-3 rounded-lg bg-gray-700/30"
+                      className="flex items-start space-x-3 p-3 rounded-lg bg-dark/30"
                     >
                       <div
-                        className={`p-2 rounded-full bg-gray-700 ${getActivityColor(
+                        className={`p-2 rounded-full bg-dark ${getActivityColor(
                           activity.type
                         )}`}
                       >
@@ -479,7 +465,7 @@ const ProfilePage: React.FC = () => {
         <TabsContent value="settings" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Personal Information */}
-            <Card className="bg-gray-800/50 border-gray-700">
+            <Card className="bg-dark/50 border-gray-800">
               <CardHeader>
                 <CardTitle className="text-white">
                   Personal Information
@@ -492,14 +478,14 @@ const ProfilePage: React.FC = () => {
                   </Label>
                   <Input
                     id="email"
-                    value={editedProfile.email}
+                    value={user?.email}
                     onChange={(e) =>
                       setEditedProfile({
                         ...editedProfile,
                         email: e.target.value,
                       })
                     }
-                    className="bg-gray-700 border-gray-600 text-white"
+                    className="bg-dark border-gray-800 text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -515,7 +501,7 @@ const ProfilePage: React.FC = () => {
                         phone: e.target.value,
                       })
                     }
-                    className="bg-gray-700 border-gray-600 text-white"
+                    className="bg-dark border-gray-800 text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -531,7 +517,7 @@ const ProfilePage: React.FC = () => {
                         location: e.target.value,
                       })
                     }
-                    className="bg-gray-700 border-gray-600 text-white"
+                    className="bg-dark border-gray-800 text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -544,10 +530,10 @@ const ProfilePage: React.FC = () => {
                       setEditedProfile({ ...editedProfile, timezone: value })
                     }
                   >
-                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectTrigger className="bg-dark border-gray-800 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectContent className="bg-dark border-gray-800">
                       <SelectItem value="PST">Pacific Standard Time</SelectItem>
                       <SelectItem value="EST">Eastern Standard Time</SelectItem>
                       <SelectItem value="GMT">Greenwich Mean Time</SelectItem>
@@ -559,7 +545,7 @@ const ProfilePage: React.FC = () => {
             </Card>
 
             {/* Preferences */}
-            <Card className="bg-gray-800/50 border-gray-700">
+            <Card className="bg-dark/50 border-gray-800">
               <CardHeader>
                 <CardTitle className="text-white">Preferences</CardTitle>
               </CardHeader>
@@ -574,10 +560,10 @@ const ProfilePage: React.FC = () => {
                       setEditedProfile({ ...editedProfile, language: value })
                     }
                   >
-                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectTrigger className="bg-dark border-gray-800 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectContent className="bg-dark border-gray-800">
                       <SelectItem value="English">English</SelectItem>
                       <SelectItem value="Spanish">Spanish</SelectItem>
                       <SelectItem value="French">French</SelectItem>
@@ -615,7 +601,7 @@ const ProfilePage: React.FC = () => {
 
         {/* Security Tab */}
         <TabsContent value="security" className="space-y-6">
-          <Card className="bg-dark border-gray-700">
+          <Card className="bg-dark border-gray-800">
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <Shield className="w-5 h-5 mr-2" />
@@ -633,7 +619,7 @@ const ProfilePage: React.FC = () => {
                 <Input
                   id="current-password"
                   type="password"
-                  className="bg-black border-gray-600 text-white"
+                  className="border-gray-800 text-white"
                 />
               </div>
               <div className="space-y-2">
@@ -643,7 +629,7 @@ const ProfilePage: React.FC = () => {
                 <Input
                   id="new-password"
                   type="password"
-                  className="bg-gray-700 border-gray-600 text-white"
+                  className=" border-gray-800 text-white"
                 />
               </div>
               <div className="space-y-2">
@@ -653,14 +639,14 @@ const ProfilePage: React.FC = () => {
                 <Input
                   id="confirm-password"
                   type="password"
-                  className="bg-gray-700 border-gray-600 text-white"
+                  className="border-gray-800 text-white"
                 />
               </div>
               <Button className="rounded-br-2xl">Update Password</Button>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800/50 border-gray-700">
+          <Card className="bg-dark border-gray-800">
             <CardHeader>
               <CardTitle className="text-white">
                 Two-Factor Authentication

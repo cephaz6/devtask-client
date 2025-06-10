@@ -18,12 +18,14 @@ import {
   Users,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
+import CreateTaskDialog from "@/components/task/CreateTaskDialog";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [openCreateTask, setOpenCreateTask] = useState(false);
 
-  // Mock data - replace with real data from your FastAPI backend
   const stats = [
     {
       title: "Total Tasks",
@@ -64,7 +66,7 @@ const Dashboard = () => {
       title: "Create New Task",
       description: "Add a new task to your workflow",
       icon: CheckSquare,
-      action: () => navigate("/dashboard/tasks"),
+      action: () => setOpenCreateTask(true),
       color: "bg-blue-600 hover:bg-blue-700",
     },
     {
@@ -85,7 +87,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Header */}
       <div className="flex flex-col">
         <h1 className="text-3xl font-bold">Hey {user?.full_name} 🎊🥳</h1>
         <p className="text-gray-600">
@@ -222,6 +223,12 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Create Task Dialog Mount */}
+      <CreateTaskDialog
+        open={openCreateTask}
+        onOpenChange={setOpenCreateTask}
+      />
     </div>
   );
 };
