@@ -1,12 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api, { setAuthToken } from "@/lib/api";
-
-type User = {
-  id: string;
-  email: string;
-  full_name?: string;
-};
+import type { User } from "@/types";
 
 type AuthContextType = {
   user: User | null;
