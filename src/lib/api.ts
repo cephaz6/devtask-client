@@ -68,8 +68,13 @@ export const deleteProject = async (id: string): Promise<void> => {
 
 // Fetch all tasks
 export const fetchTasks = async (): Promise<Task[]> => {
-  const response = await api.get("/tasks");
-  return response.data;
+  try {
+    const response = await api.get<Task[]>("/tasks/my-tasks");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch user tasks:", error);
+    throw error;
+  }
 };
 
 // Fetch a single task by ID

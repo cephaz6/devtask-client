@@ -22,7 +22,7 @@ const NotFound = () => {
             className="rounded-l-4xl rounded-br-3xl hover:rounded-tl-3xl"
             asChild
           >
-            <Link to="/" className="">
+            <Link to="/dashboard" className="">
               Go back to DevTask Tracker
             </Link>
           </Button>

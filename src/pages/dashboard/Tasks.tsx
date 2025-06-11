@@ -29,7 +29,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTasks } from "@/lib/api";
 import { type Task } from "@/types";
-import { Link } from "react-router-dom"; // Already imported, good!
+import { Link } from "react-router-dom";
 
 const Tasks = () => {
   const [openCreateTask, setOpenCreateTask] = useState(false);
@@ -37,36 +37,37 @@ const Tasks = () => {
   const [groupBy, setGroupBy] = useState("none"); // "none", "project", "status", "priority"
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // --- START OF CHANGES: Fetch tasks from API ---
+  // This useQuery call correctly fetches tasks for the current user
+  // because your backend's /tasks/my-tasks endpoint handles the user authentication
+  // and filtering based on the session/token.
   const {
-    data: tasks, // Rename 'data' to 'tasks' for clarity
+    data: tasks,
     isLoading,
     isError,
     error,
   } = useQuery<Task[], Error>({
-    queryKey: ["tasks"], // A unique key for this query
-    queryFn: fetchTasks, // The function that fetches the data
+    queryKey: ["tasks"], // The query key remains simple, as no dynamic user ID is passed from here.
+    queryFn: fetchTasks, // fetchTasks function from api.ts now calls /tasks/my-tasks
   });
-  // --- END OF CHANGES: Fetch tasks from API ---
 
+  // Helper function to determine status badge color
   const getStatusColor = (status: Task["status"]) => {
-    // Added Task["status"] for typing
     switch (status) {
       case "completed":
         return "bg-green-100 text-green-800 border-green-200";
       case "in_progress":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "not_started": // Added 'not_started' from Task interface
+      case "not_started":
         return "bg-gray-100 text-gray-800 border-gray-200";
-      case "blocked": // Added 'blocked' from Task interface if applicable
+      case "blocked":
         return "bg-red-100 text-red-800 border-red-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
+  // Helper function to determine priority badge color
   const getPriorityColor = (priority: Task["priority"]) => {
-    // Added Task["priority"] for typing
     switch (priority) {
       case "high":
         return "bg-red-100 text-red-800 border-red-200";
@@ -79,26 +80,26 @@ const Tasks = () => {
     }
   };
 
-  // Filter tasks based on API data availability and filterStatus
+  // Filters the tasks *already fetched for the current user* based on selected status.
   const filteredTasks = tasks
     ? tasks.filter((task) => {
         if (filterStatus === "all") return true;
-        // Adjust this if your API uses 'not_started' where UI expects 'todo'
+        // Map 'todo' filter to 'not_started' status if applicable
         if (filterStatus === "todo" && task.status === "not_started")
           return true;
         return task.status === filterStatus;
       })
-    : []; // If tasks is null/undefined, return empty array
+    : []; // If tasks is null/undefined, return empty array to prevent errors
 
+  // Groups the filtered tasks based on the selected grouping option.
   const groupTasks = (tasksToGroup: Task[]) => {
-    // Added Task[] for typing
     if (groupBy === "none") return { "All Tasks": tasksToGroup };
 
     return tasksToGroup.reduce((groups, task) => {
-      let key: string; // Added type for key
+      let key: string;
       switch (groupBy) {
         case "project":
-          key = task.project_id || "Unassigned Project"; // Changed to project_id
+          key = task.project_id || "Unassigned Project";
           break;
         case "status":
           key = task.status.replace(/_/g, " ").toUpperCase();
@@ -107,7 +108,7 @@ const Tasks = () => {
           key = task.priority.toUpperCase();
           break;
         default:
-          key = "All Tasks";
+          key = "All Tasks"; // Fallback
       }
 
       if (!groups[key]) {
@@ -115,21 +116,18 @@ const Tasks = () => {
       }
       groups[key].push(task);
       return groups;
-    }, {} as Record<string, Task[]>); // Added type assertion for reducer result
+    }, {} as Record<string, Task[]>); // Type assertion for the accumulator
   };
 
   const groupedTasks = groupTasks(filteredTasks);
 
-  const TaskCard = (
-    { task }: { task: Task } // Added Task type for prop
-  ) => (
-    // FIX HERE: Corrected Link 'to' prop and added className="block"
+  // TaskCard component for grid view
+  const TaskCard = ({ task }: { task: Task }) => (
     <Link to={`/dashboard/tasks/${task.id}`} className="block">
       <Card className="hover:shadow-md transition-shadow cursor-pointer group">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              {/* Removed task.emoji as it's not part of the Task interface from API */}
               <CardTitle className="text-base font-semibold group-hover:text-blue-600 transition-colors">
                 {task.title}
               </CardTitle>
@@ -143,11 +141,10 @@ const Tasks = () => {
           <p className="text-sm mb-3 line-clamp-2">{task.description}</p>
 
           <div className="flex flex-wrap gap-1 mb-3">
-            {/* Adjusted to tag.name based on Task interface { id?: string; name: string } */}
             {task.tags &&
               task.tags.map((tag) => (
                 <Badge
-                  key={tag.id || tag.name}
+                  key={tag.id || tag.name} // Use id if available, fallback to name
                   variant="outline"
                   className="text-xs"
                 >
@@ -159,14 +156,14 @@ const Tasks = () => {
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center gap-1">
               <User className="h-3 w-3" />
-              {/* Adjusted to use assignments array or owner_id */}
+              {/* Display assigned user's name or owner_id if no assignments */}
               {task.assignments && task.assignments.length > 0
-                ? task.assignments[0].name
-                : task.owner_id || "Unassigned"}
+                ? task.assignments[0].name // Assuming TaskWatcher has a 'name' field
+                : task.owner_id || "Unassigned"}{" "}
+              {/* Corrected to user_id for task creator */}
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              {/* Adjusted to use task.due_date and handle potential null */}
               {task.due_date
                 ? new Date(task.due_date).toLocaleDateString()
                 : "No Due Date"}
@@ -183,14 +180,10 @@ const Tasks = () => {
     </Link>
   );
 
-  const TaskRow = (
-    { task }: { task: Task } // Added Task type for prop
-  ) => (
-    // FIX HERE: Wrap div with Link and added className="block"
+  // TaskRow component for list view
+  const TaskRow = ({ task }: { task: Task }) => (
     <Link to={`/dashboard/tasks/${task.id}`} className="block">
       <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer group">
-        {/* Removed task.emoji */}
-
         <div className="flex-1 min-w-0">
           <h3
             className="font-semibold
@@ -211,14 +204,13 @@ const Tasks = () => {
           </Badge>
 
           <div className="text-xs text-gray-500 min-w-20">
-            {/* Adjusted to use assignments array or owner_id */}
             {task.assignments && task.assignments.length > 0
               ? task.assignments[0].name
-              : task.owner_id || "Unassigned"}
+              : task.owner_id || "Unassigned"}{" "}
+            {/* Corrected to user_id for task creator */}
           </div>
 
           <div className="text-xs text-gray-500 min-w-24">
-            {/* Adjusted to use task.due_date and handle potential null */}
             {task.due_date
               ? new Date(task.due_date).toLocaleDateString()
               : "No Due Date"}
@@ -227,17 +219,17 @@ const Tasks = () => {
       </div>
     </Link>
   );
-  // --- END OF CHANGES: TaskCard & TaskRow Component Adjustments ---
 
-  // --- START OF CHANGES: Loading, Error, and Empty States ---
+  // Loading state UI
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full text-lg text-gray-600">
-        <p>Loading tasks...</p> {/* You might want a spinner here */}
+        <p>Loading tasks...</p> {/* Consider adding a spinner for better UX */}
       </div>
     );
   }
 
+  // Error state UI
   if (isError) {
     return (
       <div className="text-red-500 text-center p-8">
@@ -250,7 +242,7 @@ const Tasks = () => {
     );
   }
 
-  // If no tasks are found after loading (either empty array or `null` from API)
+  // Empty state UI (when no tasks are found or filtered)
   if (!tasks || tasks.length === 0) {
     return (
       <Card>
@@ -272,7 +264,6 @@ const Tasks = () => {
       </Card>
     );
   }
-  // --- END OF CHANGES: Loading, Error, and Empty States ---
 
   return (
     <div className="space-y-6">
@@ -280,9 +271,10 @@ const Tasks = () => {
         <div>
           <h1 className="text-3xl font-bold">My Tasks</h1>
           <p className="text-gray-600 mt-1">
+            {/* Display count of currently filtered tasks */}
             {filteredTasks.length}{" "}
             {filteredTasks.length === 1 ? "task" : "tasks"}
-            {filterStatus !== "all" && ` · ${filterStatus.replace("_", " ")}`}
+            {filterStatus !== "all" && ` · ${filterStatus.replace(/_/g, " ")}`}
           </p>
         </div>
 
@@ -295,12 +287,12 @@ const Tasks = () => {
         </Button>
       </div>
 
-      {/* Controls */}
+      {/* Controls for view mode, grouping, and filtering */}
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex flex-wrap gap-3">
-              {/* View Mode Toggle */}
+              {/* View Mode Toggle Buttons */}
               <div className="flex items-center gap-1 border rounded-lg p-1">
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
@@ -320,7 +312,7 @@ const Tasks = () => {
                 </Button>
               </div>
 
-              {/* Group By */}
+              {/* Group By Select */}
               <Select value={groupBy} onValueChange={setGroupBy}>
                 <SelectTrigger className="w-40">
                   <Folder className="h-4 w-4 mr-2" />
@@ -335,7 +327,7 @@ const Tasks = () => {
               </Select>
             </div>
 
-            {/* Filter */}
+            {/* Filter By Status Select */}
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-40">
                 <Filter className="h-4 w-4 mr-2" />
@@ -346,19 +338,18 @@ const Tasks = () => {
                 <SelectItem value="todo">To do</SelectItem>
                 <SelectItem value="in_progress">In progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="blocked">Blocked</SelectItem>{" "}
-                {/* Added blocked status option */}
+                <SelectItem value="blocked">Blocked</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Tasks Display */}
-      {/* The `if (!tasks || tasks.length === 0)` block above now handles the empty state */}
+      {/* Render Grouped and Filtered Tasks */}
       <div className="space-y-6">
         {Object.entries(groupedTasks).map(([groupName, tasksInGroup]) => (
           <div key={groupName}>
+            {/* Display group header if grouping is active */}
             {groupBy !== "none" && (
               <div className="flex items-center gap-3 mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">
@@ -371,6 +362,7 @@ const Tasks = () => {
               </div>
             )}
 
+            {/* Render tasks in grid or list view */}
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {tasksInGroup.map((task) => (
@@ -385,6 +377,7 @@ const Tasks = () => {
               </div>
             )}
 
+            {/* Separator between groups */}
             {groupBy !== "none" &&
               groupName !==
                 Object.keys(groupedTasks)[
@@ -394,6 +387,7 @@ const Tasks = () => {
         ))}
       </div>
 
+      {/* Dialog for creating new tasks */}
       <CreateTaskDialog
         open={openCreateTask}
         onOpenChange={setOpenCreateTask}

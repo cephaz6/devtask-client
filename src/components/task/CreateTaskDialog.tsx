@@ -103,7 +103,7 @@ const CreateTaskDialog = ({
 
       // Redirect to the newly created task's page
       if (newTask && newTask.id) {
-        navigate(`tasks/${newTask.id}`);
+        navigate(`/tasks/${newTask.id}`);
       } else {
         console.warn("Task created, but no ID received for redirection.");
         // Optionally, show a success message or redirect to a default task list page

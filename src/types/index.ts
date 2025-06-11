@@ -32,7 +32,8 @@ export interface Task {
   due_date?: string | null;
   is_completed: boolean;
   project_id?: string | null;
-  owner_id: User;
+  owner_id: string;
+  owner: User;
   created_at: string;
   updated_at: string;
   tags?: Tag[];
