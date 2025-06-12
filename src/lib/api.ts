@@ -64,6 +64,20 @@ export const deleteProject = async (id: string): Promise<void> => {
   console.log(`Project ${id} deleted.`);
 };
 
+// Fetch members of a specific project
+export const fetchProjectMembers = async (
+  projectId: string
+): Promise<User[]> => {
+  try {
+    const response = await api.get(`/project-members/${projectId}/members`); // Assuming this endpoint exists on your backend
+    console.log(`API fetched members for project ${projectId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch members for project ${projectId}:`, error);
+    throw error;
+  }
+};
+
 // --- Task Queries ---
 
 // Fetch all tasks
@@ -106,9 +120,23 @@ export const deleteTask = async (id: string): Promise<void> => {
   console.log(`Task ${id} deleted.`);
 };
 
-// --- Comment Queries ---
+// Archive a task
+export const archiveTask = async (id: string): Promise<void> => {
+  await api.put(`/tasks/${id}/archive`); // Example endpoint, adjust if your backend uses a different one
+  console.log(`Task ${id} archived.`);
+};
 
-// Add these comment-related functions to your existing api.ts file
+// Update task assignments
+export const updateTaskAssignments = async (
+  id: string,
+  userIds: string[]
+): Promise<Task> => {
+  const response = await api.put(`/tasks/${id}/assignments`, {
+    user_ids: userIds,
+  });
+  console.log(`Assignments for task ${id} updated:`, response.data);
+  return response.data;
+};
 
 // --- Comment Queries ---
 
@@ -127,18 +155,17 @@ export const fetchCommentById = async (commentId: string): Promise<Comment> => {
 };
 
 // Add a new comment to a task
-// Add a new comment to a task
 export const addTaskComment = async (commentData: {
   task_id: string;
   content: string;
   parent_comment_id?: string | null;
 }): Promise<Comment> => {
-  const response = await api.post(`/comments`, commentData); // Fixed endpoint
+  const response = await api.post(`/comments`, commentData);
   console.log("API added comment:", response.data);
   return response.data;
 };
 
-// Update a comment (if you need this functionality)
+// Update a comment
 export const updateTaskComment = async (
   commentId: string,
   content: string
@@ -148,7 +175,7 @@ export const updateTaskComment = async (
   return response.data;
 };
 
-// Delete a comment (if you need this functionality)
+// Delete a comment
 export const deleteTaskComment = async (commentId: string): Promise<void> => {
   await api.delete(`/comments/${commentId}`);
   console.log("API deleted comment:", commentId);

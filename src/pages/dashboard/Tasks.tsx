@@ -155,12 +155,11 @@ const Tasks = () => {
 
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center gap-1">
-              <User className="h-3 w-3" />
-              {/* Display assigned user's name or owner_id if no assignments */}
+              <User className="h-3 w-3 text-gray-400" />
+              {/* Display assigned user's ID or task creator's ID */}
               {task.assignments && task.assignments.length > 0
-                ? task.assignments[0].name // Assuming TaskWatcher has a 'name' field
-                : task.owner_id || "Unassigned"}{" "}
-              {/* Corrected to user_id for task creator */}
+                ? task.assignments[0].user_id
+                : task.user_id || "Unassigned"}
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
@@ -205,7 +204,7 @@ const Tasks = () => {
 
           <div className="text-xs text-gray-500 min-w-20">
             {task.assignments && task.assignments.length > 0
-              ? task.assignments[0].name
+              ? task.assignments[0].user_id
               : task.owner_id || "Unassigned"}{" "}
             {/* Corrected to user_id for task creator */}
           </div>

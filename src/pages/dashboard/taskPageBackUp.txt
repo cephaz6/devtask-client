@@ -7,42 +7,33 @@ import { fetchTaskById, addTaskComment, fetchTaskComments } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-// Removed Textarea and Send as they are now in CreateComment
 import {
   ArrowLeft,
   Calendar,
-  Clock,
-  Edit,
   MessageCircle,
   Plus,
   Trash2,
   Users,
-  CheckCircle2,
-  Circle,
   Tag,
-  Timer,
-  TrendingUp,
-  Flame, // Keep these Lucide icons for rendering in JSX
-  Zap,
-  Target,
+  Edit, // Keep Edit for the header's Edit button
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import type { CommentResponse, User, Task } from "@/types"; // Ensure these types match your backend response EXACTLY
+import type { CommentResponse, User, Task } from "@/types";
 
 // Import new comment components
 import CreateComment from "@/components/comments/CreateComment";
 import Comment from "@/components/comments/Comment";
 
+// Import new task components
+import TaskDetailsCard from "@/components/task/TaskDetailsCard";
+
 // Import helper functions
 import {
   getUserInitials,
   organizeComments,
-  getProgressFromStatus,
-  getPriorityConfig,
-  getStatusConfig,
+  getStatusConfig, // <-- RE-ADDED THIS IMPORT!
   formatDate,
   getDaysUntilDue,
   getDueDateEmoji,
@@ -58,7 +49,6 @@ const TaskPage = () => {
   const { user: authUser } = useAuth();
   const queryClient = useQueryClient();
 
-  // Tanstack Query to fetch task by ID (without embedded comments if that's the backend's current behavior)
   const {
     data: taskBase,
     isLoading: isLoadingTaskBase,
@@ -67,39 +57,36 @@ const TaskPage = () => {
     queryKey: ["taskBase", taskId],
     queryFn: () => fetchTaskById(taskId),
     enabled: !!taskId,
-    staleTime: 5 * 60 * 1000, // Keep task data fresh for 5 mins
+    staleTime: 5 * 60 * 1000,
   });
 
-  // NEW: Query to fetch comments explicitly, which *does* return user data
   const {
     data: commentsWithUsers,
     isLoading: isLoadingCommentsWithUsers,
     error: errorCommentsWithUsers,
   } = useQuery<CommentResponse[], Error>({
     queryKey: ["taskComments", taskId],
-    queryFn: () => fetchTaskComments(taskId), // This function returns comments WITH users
-    enabled: !!taskId, // Only fetch if taskId exists
-    staleTime: 1 * 60 * 1000, // Keep comment data fresh for 1 min (more dynamic)
+    queryFn: () => fetchTaskComments(taskId),
+    enabled: !!taskId,
+    staleTime: 1 * 60 * 1000,
   });
 
-  // Combine taskBase data with commentsWithUsers data
   const task: Task | undefined = taskBase
     ? {
         ...taskBase,
-        comments: commentsWithUsers || [], // Overlay the comments with user data
+        comments: commentsWithUsers || [],
       }
     : undefined;
 
   const isLoading = isLoadingTaskBase || isLoadingCommentsWithUsers;
   const error = errorTaskBase || errorCommentsWithUsers;
 
-  const [newComment, setNewComment] = useState(""); // For the main comment input
-  const [replyingTo, setReplyingTo] = useState<string | null>(null); // Stores the ID of the comment being replied to
+  const [newComment, setNewComment] = useState("");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [collapsedComments, setCollapsedComments] = useState<Set<string>>(
     new Set()
   );
 
-  // Mutation for adding comments
   const addCommentMutation = useMutation<
     CommentResponse,
     Error,
@@ -132,8 +119,8 @@ const TaskPage = () => {
         }
       );
 
-      setNewComment(""); // Clear main comment input
-      setReplyingTo(null); // Clear which comment is being replied to
+      setNewComment("");
+      setReplyingTo(null);
     },
     onError: (err) => {
       console.error("Failed to add comment:", err);
@@ -141,7 +128,6 @@ const TaskPage = () => {
     },
   });
 
-  // Toggle comment collapse (kept local as it directly manipulates local state)
   const toggleCommentCollapse = (commentId: string) => {
     setCollapsedComments((prev) => {
       const newCollapsed = new Set(prev);
@@ -154,34 +140,27 @@ const TaskPage = () => {
     });
   };
 
-  // Handler for initiating a reply to a specific comment
   const handleReplyInitiate = (commentId: string) => {
     setReplyingTo(commentId);
-    // Optional: Collapse parent comments if they are not already open
-    // This is to ensure the reply form is visible
     setCollapsedComments((prev) => {
       const newCollapsed = new Set(prev);
-      newCollapsed.delete(commentId); // Ensure the parent is not collapsed
+      newCollapsed.delete(commentId);
       return newCollapsed;
     });
   };
 
-  // Handler for submitting a new root comment
   const handleSubmitRootComment = (content: string) => {
     addCommentMutation.mutate({ content, parentId: null });
   };
 
-  // Handler for submitting a reply
   const handleSubmitReply = (content: string, parentId: string) => {
     addCommentMutation.mutate({ content, parentId });
   };
 
-  // Handler to cancel a reply
   const handleCancelReply = () => {
     setReplyingTo(null);
   };
 
-  // Early exit for unauthenticated user
   if (!authUser) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -196,7 +175,6 @@ const TaskPage = () => {
     );
   }
 
-  // Loading state (combined for both queries)
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -210,7 +188,6 @@ const TaskPage = () => {
     );
   }
 
-  // Error state (combined for both queries)
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -225,7 +202,6 @@ const TaskPage = () => {
     );
   }
 
-  // Task not found state
   if (!task) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -239,18 +215,14 @@ const TaskPage = () => {
   }
 
   const isOwner = authUser.user_id === task.owner_id;
-  const progress = getProgressFromStatus(task.status);
   const comments = task.comments || [];
   const organizedComments = organizeComments(comments);
   const totalComments = comments.length;
 
-  const priorityConfig = getPriorityConfig(task.priority);
-  const statusConfig = getStatusConfig(task.status);
+  // The statusConfig for the header still needs to be computed here
+  const statusConfigForHeader = getStatusConfig(task.status); // Add this line back
 
-  // Call the helper function from the new file
   const daysUntilDue = getDaysUntilDue(task.due_date);
-
-  // Call the helper functions from the new file
   const dueDateEmoji = getDueDateEmoji(daysUntilDue);
   const dueDateText = getDueDateText(daysUntilDue);
   const dueDateColor = getDueDateColor(daysUntilDue);
@@ -267,7 +239,7 @@ const TaskPage = () => {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-3">
-                <div className="text-2xl">{statusConfig.icon}</div>{" "}
+                <div className="text-2xl">{statusConfigForHeader.icon}</div>{" "}
                 {/* Use the icon from config */}
                 <div>
                   <h1 className="text-2xl font-bold">{task.title}</h1>
@@ -301,114 +273,10 @@ const TaskPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Progress & Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Progress Card */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-blue-500" />
-                    <CardTitle className="text-sm">Progress 📈</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold mb-2">{progress}%</div>
-                  <Progress value={progress} className="h-2" />
-                </CardContent>
-              </Card>
+            {/* CONSOLIDATED Task Details Card */}
+            <TaskDetailsCard task={task} />
 
-              {/* Priority Card */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">
-                    Priority {priorityConfig.icon}{" "}
-                    {/* Use the icon from config */}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant={priorityConfig.variant} className="text-sm">
-                    {/* Render Lucide icon based on priority type */}
-                    {task.priority === "high" && (
-                      <Flame className="w-4 h-4 mr-1" />
-                    )}
-                    {task.priority === "medium" && (
-                      <Zap className="w-4 h-4 mr-1" />
-                    )}
-                    {task.priority === "low" && (
-                      <Target className="w-4 h-4 mr-1" />
-                    )}
-                    <span className="capitalize">
-                      {task.priority || "Unknown"}
-                    </span>
-                  </Badge>
-                </CardContent>
-              </Card>
-
-              {/* Time Card */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <Timer className="h-4 w-4 text-purple-500" />
-                    <CardTitle className="text-sm">Time ⏱️</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {task.actual_time || 0}h
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    of {task.estimated_time || 0}h
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Status Card */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    Status {statusConfig.icon} {/* Use the icon from config */}
-                  </CardTitle>
-                  <Badge
-                    variant={statusConfig.variant}
-                    className={statusConfig.className}
-                  >
-                    {/* Render Lucide icon based on status type */}
-                    {task.status === "completed" && (
-                      <CheckCircle2 className="w-4 h-4 mr-1" />
-                    )}
-                    {task.status === "in_progress" && (
-                      <Clock className="w-4 h-4 mr-1" />
-                    )}
-                    {task.status === "not_started" && (
-                      <Circle className="w-4 h-4 mr-1" />
-                    )}
-                    {task.status === "blocked" && (
-                      <Circle className="w-4 h-4 mr-1" />
-                    )}
-                    <span className="ml-1">{statusConfig.text}</span>
-                  </Badge>
-                </div>
-              </CardHeader>
-            </Card>
-
-            {/* Description */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Edit className="h-5 w-5" />
-                  Description 📝
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground leading-relaxed">
-                  {task.description || "No description provided"}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Tags */}
+            {/* Tags - Remains here */}
             {task.tags && task.tags.length > 0 && (
               <Card>
                 <CardHeader>
@@ -561,6 +429,7 @@ const TaskPage = () => {
                   {task.dependencies.map((dep) => (
                     <div key={dep.id} className="border rounded-lg p-3">
                       <div className="flex items-center gap-2 mb-1">
+                        {/* Note: Circle icon needed here still, not removed */}
                         <Circle className="h-4 w-4 text-yellow-500" />
                         <p className="font-medium text-sm">
                           {dep.title || `Dependency #${dep.id.slice(-8)}`}

@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchTaskById, addTaskComment, fetchTaskComments } from "@/lib/api";
+import {
+  fetchTaskById,
+  addTaskComment,
+  fetchTaskComments,
+  updateTask,
+  deleteTask,
+  archiveTask,
+  updateTaskAssignments,
+} from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,8 +25,23 @@ import {
   Trash2,
   Users,
   Tag,
-  Edit, // Keep Edit for the header's Edit button
+  Edit,
+  UserPlus,
+  Circle,
+  MoreHorizontal,
+  Settings,
+  Archive,
+  Copy,
+  Share,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
 import type { CommentResponse, User, Task } from "@/types";
 
@@ -29,11 +52,17 @@ import Comment from "@/components/comments/Comment";
 // Import new task components
 import TaskDetailsCard from "@/components/task/TaskDetailsCard";
 
+// Import dialog components
+import EditTaskDialog from "@/components/task/EditTaskDialog";
+import AssignmentDialog from "@/components/task/AssignmentDialog";
+import DeleteTaskDialog from "@/components/task/DeleteTaskDialog"; // Import the new Delete dialog
+import ShareTaskDialog from "@/components/task/ShareTaskDialog"; // Import the new Share dialog
+
 // Import helper functions
 import {
   getUserInitials,
   organizeComments,
-  getStatusConfig, // <-- RE-ADDED THIS IMPORT!
+  getStatusConfig,
   formatDate,
   getDaysUntilDue,
   getDueDateEmoji,
@@ -43,6 +72,12 @@ import {
 } from "@/helpers/taskHelpers";
 
 const TaskPage = () => {
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+
   const location = useLocation();
   const navigate = useNavigate();
   const taskId = location.pathname.split("/").pop() || "";
@@ -86,6 +121,16 @@ const TaskPage = () => {
   const [collapsedComments, setCollapsedComments] = useState<Set<string>>(
     new Set()
   );
+
+  // LOGIC FIX: Access control logic - corrected owner_id to user_id
+  const isOwner = task ? authUser?.user_id === task.user_id : false;
+  const isAssigned = task
+    ? task.assignments?.some(
+        (assignment) => assignment.user_id === authUser?.user_id
+      )
+    : false;
+  const canEdit = isOwner || isAssigned;
+  // END LOGIC FIX
 
   const addCommentMutation = useMutation<
     CommentResponse,
@@ -161,6 +206,105 @@ const TaskPage = () => {
     setReplyingTo(null);
   };
 
+  // --- MUTATIONS: Task Update, Delete, Archive, Assignment ---
+
+  const updateTaskMutation = useMutation<Task, Error, Partial<Task>>({
+    mutationFn: (updatedTaskData) => updateTask(taskId, updatedTaskData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["taskBase", taskId] });
+      setEditDialogOpen(false); // Close the dialog on success
+      // TODO: Optionally show a success toast/message
+    },
+    onError: (err) => {
+      console.error("Failed to update task:", err);
+      // TODO: Display a user-friendly error message
+    },
+  });
+
+  const deleteTaskMutation = useMutation<void, Error>({
+    mutationFn: () => deleteTask(taskId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }); // Invalidate the tasks list page
+      setDeleteDialogOpen(false); // Close the dialog
+      navigate("/tasks"); // Navigate back to the tasks list
+      // TODO: Optionally show a success toast/message
+    },
+    onError: (err) => {
+      console.error("Failed to delete task:", err);
+      // TODO: Display a user-friendly error message
+    },
+  });
+
+  const archiveTaskMutation = useMutation<void, Error>({
+    mutationFn: () => archiveTask(taskId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["taskBase", taskId] }); // Invalidate current task
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }); // Invalidate the tasks list if it shows archived tasks
+      setArchiveDialogOpen(false); // Close the dialog
+      navigate("/tasks"); // Navigate back as the task might be hidden from active lists
+      // TODO: Optionally show a success toast/message
+    },
+    onError: (err) => {
+      console.error("Failed to archive task:", err);
+      // TODO: Display a user-friendly error message
+    },
+  });
+
+  const updateAssignmentMutation = useMutation<
+    Task,
+    Error,
+    { userIds: string[] }
+  >({
+    mutationFn: ({ userIds }) => updateTaskAssignments(taskId, userIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["taskBase", taskId] }); // Invalidate current task to show new assignments
+      setAssignmentDialogOpen(false); // Close the dialog
+      // TODO: Optionally show a success toast/message
+    },
+    onError: (err) => {
+      console.error("Failed to update assignments:", err);
+      // TODO: Display a user-friendly error message
+    },
+  });
+
+  // Dialog handlers - now calling mutations
+  const handleEditTask = () => setEditDialogOpen(true);
+  const handleDeleteTask = () => setDeleteDialogOpen(true);
+  const handleArchiveTask = () => setArchiveDialogOpen(true);
+  const handleShareTask = () => setShareDialogOpen(true);
+  const handleDuplicateTask = () => {
+    // TODO: Implement task duplication logic
+    console.log("Duplicate task:", taskId);
+  };
+  const handleManageAssignments = () => {
+    // Only open the assignment dialog if the task has a project_id
+    if (task?.project_id) {
+      setAssignmentDialogOpen(true);
+    } else {
+      // TODO: Potentially show a toast or alert indicating no project is assigned
+      console.warn(
+        "Cannot manage assignments: Task is not associated with a project."
+      );
+    }
+  };
+
+  const handleEditSubmit = (updatedTask: Partial<Task>) => {
+    updateTaskMutation.mutate(updatedTask);
+  };
+
+  const handleDeleteConfirm = () => {
+    deleteTaskMutation.mutate();
+  };
+
+  const handleArchiveConfirm = () => {
+    archiveTaskMutation.mutate();
+  };
+
+  const handleAssignmentSubmit = (assignmentData: { userIds: string[] }) => {
+    updateAssignmentMutation.mutate(assignmentData);
+  };
+  // --- END MUTATIONS ---
+
   if (!authUser) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -214,13 +358,11 @@ const TaskPage = () => {
     );
   }
 
-  const isOwner = authUser.user_id === task.owner_id;
   const comments = task.comments || [];
   const organizedComments = organizeComments(comments);
   const totalComments = comments.length;
 
-  // The statusConfig for the header still needs to be computed here
-  const statusConfigForHeader = getStatusConfig(task.status); // Add this line back
+  const statusConfigForHeader = getStatusConfig(task.status);
 
   const daysUntilDue = getDaysUntilDue(task.due_date);
   const dueDateEmoji = getDueDateEmoji(daysUntilDue);
@@ -230,7 +372,7 @@ const TaskPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - *NOT* YET extracted to TaskHeader component */}
+      {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -239,8 +381,7 @@ const TaskPage = () => {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-3">
-                <div className="text-2xl">{statusConfigForHeader.icon}</div>{" "}
-                {/* Use the icon from config */}
+                <div className="text-2xl">{statusConfigForHeader.icon}</div>
                 <div>
                   <h1 className="text-2xl font-bold">{task.title}</h1>
                   <p className="text-sm text-muted-foreground">
@@ -249,22 +390,90 @@ const TaskPage = () => {
                 </div>
               </div>
             </div>
-            {isOwner && (
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+
+            {/* Enhanced Action Buttons */}
+            <div className="flex gap-2">
+              {/* Primary Edit Button - Always visible for those who can edit */}
+              {canEdit && (
+                <Button variant="default" size="sm" onClick={handleEditTask}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  Edit Task
                 </Button>
+              )}
+
+              {/* Quick Actions for Owner */}
+              {isOwner && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-destructive"
+                  onClick={handleManageAssignments}
+                  // Disable button if no project_id is associated
+                  disabled={!task.project_id}
+                  title={
+                    !task.project_id
+                      ? "Assignees can only be managed for tasks associated with a project"
+                      : "Manage assignees"
+                  }
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Assignees
                 </Button>
-              </div>
-            )}
+              )}
+
+              {/* More Actions Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>Task Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+
+                  {/* Actions available to all users */}
+                  <DropdownMenuItem onClick={handleShareTask}>
+                    <Share className="h-4 w-4 mr-2" />
+                    Share Task
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={handleDuplicateTask}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Duplicate Task
+                  </DropdownMenuItem>
+
+                  {/* Edit actions for those who can edit */}
+                  {canEdit && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleEditTask}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Details
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                  {/* Owner-only actions */}
+                  {isOwner && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleArchiveTask}>
+                        <Archive className="h-4 w-4 mr-2" />
+                        Archive Task
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={handleDeleteTask}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Task
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </div>
@@ -276,14 +485,25 @@ const TaskPage = () => {
             {/* CONSOLIDATED Task Details Card */}
             <TaskDetailsCard task={task} />
 
-            {/* Tags - Remains here */}
+            {/* Tags */}
             {task.tags && task.tags.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="h-5 w-5" />
-                    Tags 🏷️
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Tag className="h-5 w-5" />
+                      Tags 🏷️
+                    </CardTitle>
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleEditTask}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -297,7 +517,7 @@ const TaskPage = () => {
               </Card>
             )}
 
-            {/* Comments - Now using the new components */}
+            {/* Comments */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -306,22 +526,22 @@ const TaskPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Add new comment form - Using the CreateComment component */}
+                {/* Add new comment form */}
                 <div className="border rounded-lg p-4 bg-muted/20">
                   <CreateComment
                     onSubmit={handleSubmitRootComment}
                     isSubmitting={
                       addCommentMutation.isPending && replyingTo === null
-                    } // Only pending if it's the root comment form
+                    }
                     placeholder="Write a new comment..."
-                    initialContent={newComment} // Pass newComment to CreateComment
-                    onCancel={() => setNewComment("")} // Allow cancelling root comment draft
+                    initialContent={newComment}
+                    onCancel={() => setNewComment("")}
                   />
                 </div>
 
                 <Separator />
 
-                {/* Render threaded comments - Using the Comment component */}
+                {/* Render threaded comments */}
                 <div className="space-y-4">
                   {organizedComments.map((comment) => (
                     <Comment
@@ -348,32 +568,35 @@ const TaskPage = () => {
             </Card>
           </div>
 
-          {/* Sidebar - Keep your existing sidebar content */}
+          {/* Sidebar */}
           <div className="space-y-6">
             {/* Due Date */}
             <Card className={borderColor}>
-              {" "}
-              {/* Use the helper for border color */}
               <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Due Date {dueDateEmoji} {/* Use the helper for emoji */}
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Due Date {dueDateEmoji}
+                  </CardTitle>
+                  {canEdit && (
+                    <Button variant="ghost" size="sm" onClick={handleEditTask}>
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="font-medium">
                   {task.due_date ? formatDate(task.due_date) : "No due date"}
                 </p>
-                <p className={`text-sm ${dueDateColor}`}>
-                  {" "}
-                  {/* Use the helper for text color */}
-                  {dueDateText} {/* Use the helper for text */}
-                </p>
+                <p className={`text-sm ${dueDateColor}`}>{dueDateText}</p>
               </CardContent>
             </Card>
 
             {/* Assignees */}
-            {task.assignments && task.assignments.length > 0 && (
+            {/* Display this card only if there are assignments OR if the task has a project_id (to show message) */}
+            {(task.assignments && task.assignments.length > 0) ||
+            task.project_id ? (
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -381,36 +604,53 @@ const TaskPage = () => {
                       <Users className="h-4 w-4" />
                       Assignees 👥
                     </CardTitle>
-                    {isOwner && (
-                      <Button variant="ghost" size="sm">
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    )}
+                    {isOwner &&
+                      task.project_id && ( // Only show edit button if owner AND task has a project
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleManageAssignments}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {task.assignments.map((assignment) => (
-                    <div
-                      key={assignment.user_id}
-                      className="flex items-center gap-3"
-                    >
-                      <Avatar>
-                        <AvatarFallback>
-                          {getUserInitials(assignment)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">
-                          {assignment.full_name ||
-                            assignment.email ||
-                            "Unknown Assignee"}
-                        </p>
+                  {task.assignments && task.assignments.length > 0 ? (
+                    task.assignments.map((assignment) => (
+                      <div
+                        key={assignment.user_id}
+                        className="flex items-center gap-3"
+                      >
+                        <Avatar>
+                          <AvatarFallback>
+                            {getUserInitials(assignment)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-sm">
+                            {assignment.full_name ||
+                              assignment.email ||
+                              "Unknown Assignee"}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      No assignees yet for this project task.
+                    </p>
+                  )}
+                  {!task.project_id && (
+                    <p className="text-muted-foreground text-sm">
+                      Assignees can only be managed for tasks associated with a
+                      project.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
-            )}
+            ) : null}
 
             {/* Dependencies */}
             {task.dependencies && task.dependencies.length > 0 && (
@@ -419,8 +659,12 @@ const TaskPage = () => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm">Dependencies 🔗</CardTitle>
                     {isOwner && (
-                      <Button variant="ghost" size="sm">
-                        <Plus className="h-4 w-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleEditTask}
+                      >
+                        <Edit className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
@@ -429,7 +673,6 @@ const TaskPage = () => {
                   {task.dependencies.map((dep) => (
                     <div key={dep.id} className="border rounded-lg p-3">
                       <div className="flex items-center gap-2 mb-1">
-                        {/* Note: Circle icon needed here still, not removed */}
                         <Circle className="h-4 w-4 text-yellow-500" />
                         <p className="font-medium text-sm">
                           {dep.title || `Dependency #${dep.id.slice(-8)}`}
@@ -472,6 +715,62 @@ const TaskPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Dialog Components */}
+      <EditTaskDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        task={task}
+        onSubmit={handleEditSubmit}
+        isOwner={isOwner}
+      />
+
+      <AssignmentDialog
+        open={assignmentDialogOpen}
+        onOpenChange={setAssignmentDialogOpen}
+        task={task} // Keep task for current assignments
+        currentProjectId={task?.project_id} // Pass project_id for fetching project members
+        onSubmit={handleAssignmentSubmit}
+        isSubmitting={updateAssignmentMutation.isPending} // Pass submission state
+      />
+
+      {/* New Delete Confirmation Dialog Component */}
+      <DeleteTaskDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        taskTitle={task.title}
+      />
+
+      {/* New Share Dialog Component */}
+      <ShareTaskDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        taskUrl={window.location.href}
+      />
+
+      {/* Archive Confirmation Dialog (remains inline for now as it's not a common pattern) */}
+      {archiveDialogOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4 border">
+            <h2 className="text-lg font-semibold mb-4">Archive Task 📦</h2>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to archive "<strong>{task.title}</strong>"?
+              Archived tasks can be restored later but won't appear in active
+              task lists.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setArchiveDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleArchiveConfirm}>Archive Task</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
