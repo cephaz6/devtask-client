@@ -167,7 +167,7 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
               {/* Use task.owner?.profile_picture_url if available */}
               {/* <AvatarImage src={task.owner?.profile_picture_url} alt={task.owner?.full_name || "Creator"} /> */}
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-semibold">
-                {getCreatorInitials(task.owner_id)}
+                {getCreatorInitials(task.owner)}
               </AvatarFallback>
             </Avatar>
             <div className="text-center">
@@ -175,7 +175,7 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
                 Creator
               </p>
               <p className="text-xs text-foreground font-medium leading-tight line-clamp-1">
-                {task.owner_id?.full_name || "Unknown"}
+                {task.owner?.full_name || "Unknown"}
               </p>
             </div>
           </div>

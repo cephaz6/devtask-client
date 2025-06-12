@@ -13,6 +13,7 @@ import {
   Users,
   CheckCircle,
   Activity,
+  UserCircle2Icon,
 } from "lucide-react";
 import {
   Card,
@@ -281,13 +282,9 @@ const ProfilePage: React.FC = () => {
                 <div className="flex flex-col items-center text-center">
                   <div className="relative">
                     <Avatar className="w-24 h-24">
-                      <AvatarImage src={profile.avatar} alt={user?.full_name} />
-                      <AvatarFallback className="bg-blue-600 text-white text-2xl">
-                        {user?.full_name ||
-                          "AA"
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                      <AvatarImage src={profile.avatar} />
+                      <AvatarFallback className="text-white text-2xl">
+                        <UserCircle2Icon className="w-16 h-16" />
                       </AvatarFallback>
                     </Avatar>
                     {isEditing && (
