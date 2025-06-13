@@ -42,9 +42,11 @@ export const fetchProjects = async (): Promise<Project[]> => {
   return response.data;
 };
 
-// Fetch a single project by ID
-export const fetchProjectById = async (id: string): Promise<Project> => {
-  const response = await api.get(`/project/${id}`);
+// Fetch a single project by ID (this function now fetches detailed project info)
+export const fetchProjectDetails = async (id: string): Promise<Project> => {
+  // CORRECTED: Changed endpoint to /projects/{project_id}/details
+  const response = await api.get(`/project/${id}/details`);
+  console.log(`API fetched project details for ${id}:`, response.data);
   return response.data;
 };
 
@@ -73,14 +75,13 @@ export const deleteProject = async (id: string): Promise<void> => {
   console.log(`Project ${id} deleted.`);
 };
 
-// Fetch members of a specific project
+// Fetch members of a specific project (might become redundant if fetchProjectDetails loads all members)
 export const fetchProjectMembers = async (
   projectId: string
 ): Promise<User[]> => {
   try {
     const response = await api.get(`/project-members/${projectId}/members`);
     console.log(`API fetched members for project ${projectId}:`, response.data);
-    // Assuming the backend now returns User objects directly or can be mapped
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch members for project ${projectId}:`, error);
@@ -133,7 +134,7 @@ export const removeProjectMember = async (
 
 // --- Task Queries ---
 
-// Fetch all tasks
+// Fetch all tasks (for current user's dashboard)
 export const fetchTasks = async (): Promise<Task[]> => {
   try {
     const response = await api.get<Task[]>("/tasks/my-tasks");
@@ -290,12 +291,5 @@ export const markNotificationAsRead = async (
   );
   return response.data;
 };
-
-// NOTE: The backend endpoint `DELETE /notifications/{notification_id}` was noted.
-// If you need a function to delete a notification, you would add:
-// export const deleteNotification = async (notificationId: string): Promise<void> => {
-//   await api.delete(`/notifications/${notificationId}`);
-//   console.log(`API deleted notification: ${notificationId}`);
-// };
 
 export default api;

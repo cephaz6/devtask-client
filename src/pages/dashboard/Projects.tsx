@@ -29,13 +29,16 @@ import { getUserInitials, formatDate } from "@/helpers/taskHelpers";
 
 // Import the new CreateProjectDialog
 import CreateProjectDialog from "@/components/project/CreateProjectDialog";
-import { randomInt } from "crypto";
 
 const Projects = () => {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
   const queryClient = useQueryClient();
+
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
   // Fetch projects linked to the current user
   const {

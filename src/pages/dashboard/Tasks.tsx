@@ -190,7 +190,7 @@ const Tasks = () => {
           >
             {task.title}
           </h3>
-          <p className="text-sm text-gray-600 truncate">{task.description}</p>
+          <p className="text-sm `text-gray-600` truncate">{task.description}</p>
         </div>
 
         <div className="flex items-center gap-3">

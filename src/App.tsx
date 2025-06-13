@@ -11,6 +11,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import Register from "./pages/auth/Register";
 import ProfilePage from "./pages/dashboard/Profile";
 import TaskPage from "./pages/dashboard/TaskPage";
+import ProjectPage from "./pages/dashboard/ProjectPage";
 
 const App = () => {
   return (
@@ -32,10 +33,14 @@ const App = () => {
             }
           >
             <Route index element={<Dashboard />} />
+
             <Route path="tasks" element={<Tasks />} />
-            <Route path="projects" element={<Projects />} />
-            <Route path="my-profile" element={<ProfilePage />} />
             <Route path="tasks/:id" element={<TaskPage />} />
+
+            <Route path="projects" element={<Projects />} />
+            <Route path="projects/:id" element={<ProjectPage />} />
+
+            <Route path="my-profile" element={<ProfilePage />} />
           </Route>
 
           {/* Catch-all */}

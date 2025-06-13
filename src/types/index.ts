@@ -27,7 +27,7 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  status: "not_started" | "in_progress" | "completed" | "blocked";
+  status: "not_started" | "in_progress" | "pending" | "completed" | "cancelled";
   priority: "low" | "medium" | "high";
   estimated_time: number;
   actual_time: number;
