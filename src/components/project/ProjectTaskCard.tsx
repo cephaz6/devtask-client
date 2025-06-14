@@ -64,9 +64,9 @@ const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({ task }) => {
                  transform hover:-translate-y-0.5 hover:scale-[1.01] border border-neutral-700 relative group"
       onClick={handleCardClick}
     >
-      <CardContent className="p-3 space-y-2">
+      <CardContent className="px-2 space-y-1">
         {/* Draggable Indicator - positioned to the right of the title area */}
-        <div className="absolute top-2 right-2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-2  text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <GripVertical className="h-5 w-5" />
         </div>
 
@@ -86,11 +86,11 @@ const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({ task }) => {
         </div>
 
         {/* Task Description (Very Short - line-clamp-1) */}
-        {task.description && (
+        {/* {task.description && (
           <p className="text-xs text-gray-300 line-clamp-1">
             {task.description}
           </p>
-        )}
+        )} */}
 
         {/* Tags */}
         {task.tags && task.tags.length > 0 && (

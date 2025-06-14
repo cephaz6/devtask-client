@@ -12,9 +12,9 @@ const ProjectBoard: React.FC<ProjectBoardProps> = ({ tasks, onAddTask }) => {
   // Define the order and display names for your Kanban columns
   const columnStatuses: Array<{ key: Task["status"]; title: string }> = [
     { key: "not_started", title: "To Do" },
-    { key: "pending", title: "Pending" },
+    // { key: "pending", title: "Pending" },
     { key: "in_progress", title: "In Progress" },
-    { key: "on_hold", title: "On Hold" },
+    // { key: "on_hold", title: "On Hold" },
     { key: "completed", title: "Completed" },
     { key: "cancelled", title: "Cancelled" },
   ];

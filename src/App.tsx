@@ -3,15 +3,15 @@ import Login from "@/pages/auth/Login";
 import NotFound from "@/pages/404/NotFound";
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/dashboard/Dashboard";
-import Tasks from "@/pages/dashboard/Tasks";
-import Projects from "@/pages/dashboard/Projects";
+import Tasks from "@/pages/dashboard/task/Tasks";
+import Projects from "@/pages/dashboard/project/Projects";
 import ThemeProvider from "./components/providers/ThemeProvider";
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import Register from "./pages/auth/Register";
-import ProfilePage from "./pages/dashboard/Profile";
-import TaskPage from "./pages/dashboard/TaskPage";
-import ProjectPage from "./pages/dashboard/ProjectPage";
+import ProfilePage from "./pages/dashboard/user/Profile";
+import TaskPage from "./pages/dashboard/task/TaskPage";
+import ProjectPage from "./pages/dashboard/project/ProjectPage";
 
 const App = () => {
   return (

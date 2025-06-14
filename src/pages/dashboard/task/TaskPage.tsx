@@ -21,7 +21,6 @@ import {
   ArrowLeft,
   Calendar,
   MessageCircle,
-  Plus,
   Trash2,
   Users,
   Tag,
@@ -29,7 +28,6 @@ import {
   UserPlus,
   Circle,
   MoreHorizontal,
-  Settings,
   Archive,
   Copy,
   Share,
@@ -43,7 +41,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
-import type { CommentResponse, User, Task } from "@/types";
+import type { CommentResponse, Task } from "@/types";
 
 // Import new comment components
 import CreateComment from "@/components/comments/CreateComment";
@@ -226,7 +224,7 @@ const TaskPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] }); // Invalidate the tasks list page
       setDeleteDialogOpen(false); // Close the dialog
-      navigate("/tasks"); // Navigate back to the tasks list
+      navigate("./tasks"); // Navigate back to the tasks list
       // TODO: Optionally show a success toast/message
     },
     onError: (err) => {
@@ -241,7 +239,7 @@ const TaskPage = () => {
       queryClient.invalidateQueries({ queryKey: ["taskBase", taskId] }); // Invalidate current task
       queryClient.invalidateQueries({ queryKey: ["tasks"] }); // Invalidate the tasks list if it shows archived tasks
       setArchiveDialogOpen(false); // Close the dialog
-      navigate("/tasks"); // Navigate back as the task might be hidden from active lists
+      navigate("./tasks"); // Navigate back as the task might be hidden from active lists
       // TODO: Optionally show a success toast/message
     },
     onError: (err) => {

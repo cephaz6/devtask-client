@@ -62,7 +62,7 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
     if (!projectMembers) {
       return []; // Return an empty array if projectMembers is not yet loaded
     }
-    return projectMembers.filter((member) => member.user_id !== taskOwnerId);
+    return projectMembers.filter((members) => members.user_id !== taskOwnerId);
   }, [projectMembers, taskOwnerId]); // Dependencies for useMemo
 
   // Effect to initialize selectedAssigneeIds when task or selectableMembers change
@@ -74,7 +74,7 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
         task.assignments
           .filter((assignment) =>
             selectableMembers.some(
-              (member) => member.user_id === assignment.user_id
+              (members) => members.user_id === assignment.user_id
             )
           )
           .map((assignment) => assignment.user_id)
@@ -163,36 +163,39 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
               </div>
             ) : selectableMembers && selectableMembers.length > 0 ? (
               <div className="space-y-3">
-                {selectableMembers.map((member) => (
-                  <div key={member.user_id} className="flex items-center gap-3">
+                {selectableMembers.map((members) => (
+                  <div
+                    key={members.user_id}
+                    className="flex items-center gap-3"
+                  >
                     <Avatar>
                       <AvatarFallback className="bg-blue-500 text-white font-semibold">
                         {/* More robust initial display */}
-                        {getUserInitials(member) ||
-                          (member.user_id
-                            ? member.user_id.slice(0, 2).toUpperCase()
+                        {getUserInitials(members) ||
+                          (members.user_id
+                            ? members.user_id.slice(0, 2).toUpperCase()
                             : "??")}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <p className="font-medium text-sm">
                         {/* Display full_name, fallback to email, then user_id for display */}
-                        {member.full_name ||
-                          member.email ||
-                          `User ID: ${member.user_id}`}
+                        {members.full_name ||
+                          members.email ||
+                          `User ID: ${members.user_id}`}
                       </p>
-                      {member.full_name && member.email && (
+                      {members.full_name && members.email && (
                         <p className="text-xs text-muted-foreground">
-                          {member.email}
+                          {members.email}
                         </p>
                       )}
                     </div>
                     <Checkbox
-                      checked={selectedAssigneeIds.has(member.user_id)}
+                      checked={selectedAssigneeIds.has(members.user_id)}
                       onCheckedChange={(checked) =>
-                        handleCheckboxChange(member.user_id, !!checked)
+                        handleCheckboxChange(members.user_id, !!checked)
                       }
-                      id={`checkbox-${member.user_id}`}
+                      id={`checkbox-${members.user_id}`}
                     />
                   </div>
                 ))}

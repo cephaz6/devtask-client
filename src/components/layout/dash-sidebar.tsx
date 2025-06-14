@@ -1,4 +1,4 @@
-import { Home, ListTodo, Folder } from "lucide-react";
+import { Home, ListTodo, Folder, Bot, RailSymbol } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useSidebar } from "../providers/SidebarProvider";
 import {
@@ -10,8 +10,9 @@ import {
 
 const items = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
-  { title: "Tasks", icon: ListTodo, url: "/dashboard/tasks" },
   { title: "Projects", icon: Folder, url: "/dashboard/projects" },
+  { title: "Tasks", icon: ListTodo, url: "/dashboard/tasks" },
+  { title: "Co-Pilot", icon: Bot, url: "/dashboard/co-pilot" },
 ];
 
 export function AppSidebar() {
@@ -29,6 +30,7 @@ export function AppSidebar() {
         <Link to={"../dashboard"}>
           <div className="mb-6 flex items-center justify-center text-xl font-bold">
             {collapsed ? "D" : "DevTask"}
+            <RailSymbol className="text-avocado-500" />
           </div>
         </Link>
         <hr />

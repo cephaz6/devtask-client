@@ -1,5 +1,4 @@
-// src/lib/api.ts
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import type {
   Task,
   Project,
@@ -9,16 +8,15 @@ import type {
   Notification,
   NotificationType,
   NotificationCreateRequest,
-} from "@/types"; // Import all necessary types, including new Notification types
+} from "@/types";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const api = axios.create({
   baseURL,
-  withCredentials: true, // If your backend uses cookies/session, otherwise false
+  withCredentials: true,
 });
 
-// Helper to set/remove auth header (useful after login/logout)
 export const setAuthToken = (token: string | null) => {
   if (token) {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -27,30 +25,24 @@ export const setAuthToken = (token: string | null) => {
   }
 };
 
-// You might also have a /auth/me or /users/me endpoint to fetch current user details
 export const fetchCurrentUser = async (): Promise<User> => {
-  const response = await api.get("/auth/me"); // Assuming your backend has an endpoint for current user
+  const response = await api.get("/auth/me");
   return response.data;
 };
 
 // --- Project Queries ---
-
-// Fetch all projects (now uses the /my-projects endpoint)
 export const fetchProjects = async (): Promise<Project[]> => {
   const response = await api.get("/project/my-projects");
   console.log("API fetched projects:", response.data);
   return response.data;
 };
 
-// Fetch a single project by ID (this function now fetches detailed project info)
 export const fetchProjectDetails = async (id: string): Promise<Project> => {
-  // CORRECTED: Changed endpoint to /projects/{project_id}/details
   const response = await api.get(`/project/${id}/details`);
   console.log(`API fetched project details for ${id}:`, response.data);
   return response.data;
 };
 
-// Create a new project
 export const createProject = async (
   projectData: Partial<Project>
 ): Promise<Project> => {
@@ -59,7 +51,6 @@ export const createProject = async (
   return response.data;
 };
 
-// Update an existing project
 export const updateProject = async (
   id: string,
   projectData: Partial<Project>
@@ -69,13 +60,11 @@ export const updateProject = async (
   return response.data;
 };
 
-// Delete a project
 export const deleteProject = async (id: string): Promise<void> => {
   await api.delete(`/project/${id}`);
   console.log(`Project ${id} deleted.`);
 };
 
-// Fetch members of a specific project (might become redundant if fetchProjectDetails loads all members)
 export const fetchProjectMembers = async (
   projectId: string
 ): Promise<User[]> => {
@@ -90,23 +79,31 @@ export const fetchProjectMembers = async (
 };
 
 // --- Project Member Endpoints ---
+export interface ProjectInvitePayload {
+  project_id: string; // Mandatory project_id
+  user_identifier: string; // The single identifier field (can be user_id or email)
+  role: "owner" | "member"; // Mandatory role
+}
 
-// Invite a user to a project
+// Invite a user to a project by sending the ProjectInvitePayload directly
 export const inviteProjectMember = async (
-  projectId: string,
-  userId: string,
-  role: "owner" | "member" = "member"
+  payload: ProjectInvitePayload // The function now explicitly accepts the structured payload
 ): Promise<ProjectMember> => {
-  const response = await api.post("/project-members/invite", {
-    project_id: projectId,
-    user_id: userId,
-    role: role,
-  });
-  console.log("API invited project member:", response.data);
-  return response.data;
+  try {
+    // Send the entire payload object directly to the backend
+    const response = await api.post("/project-members/invite", payload);
+    console.log("API invited project member:", response.data);
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.detail ||
+      error.message ||
+      "An unknown error occurred";
+    console.error("Error inviting project member:", errorMessage);
+    throw new Error(errorMessage);
+  }
 };
 
-// Update a member's role in a project
 export const updateProjectMemberRole = async (
   projectId: string,
   userId: string,
@@ -121,7 +118,6 @@ export const updateProjectMemberRole = async (
   return response.data;
 };
 
-// Remove a member from a project
 export const removeProjectMember = async (
   projectId: string,
   userId: string
@@ -133,8 +129,6 @@ export const removeProjectMember = async (
 };
 
 // --- Task Queries ---
-
-// Fetch all tasks (for current user's dashboard)
 export const fetchTasks = async (): Promise<Task[]> => {
   try {
     const response = await api.get<Task[]>("/tasks/my-tasks");
@@ -145,20 +139,17 @@ export const fetchTasks = async (): Promise<Task[]> => {
   }
 };
 
-// Fetch a single task by ID
 export const fetchTaskById = async (id: string): Promise<Task> => {
   const response = await api.get(`/tasks/${id}`);
   return response.data;
 };
 
-// Create a new task
 export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
   const response = await api.post("/tasks", taskData);
   console.log("Task created:", response.data);
   return response.data;
 };
 
-// Update an existing task
 export const updateTask = async (
   id: string,
   taskData: Partial<Task>
@@ -168,19 +159,16 @@ export const updateTask = async (
   return response.data;
 };
 
-// Delete a task
 export const deleteTask = async (id: string): Promise<void> => {
   await api.delete(`/tasks/${id}`);
   console.log(`Task ${id} deleted.`);
 };
 
-// Archive a task
 export const archiveTask = async (id: string): Promise<void> => {
   await api.put(`/tasks/${id}/archive`);
   console.log(`Task ${id} archived.`);
 };
 
-// Update task assignments
 export const updateTaskAssignments = async (
   id: string,
   userIds: string[]
@@ -193,22 +181,18 @@ export const updateTaskAssignments = async (
 };
 
 // --- Comment Queries ---
-
-// Fetch all comments for a specific task
 export const fetchTaskComments = async (taskId: string): Promise<Comment[]> => {
   const response = await api.get(`/comments/${taskId}/`);
   console.log("API fetched task comments:", response.data);
   return response.data;
 };
 
-// Fetch a single comment by its ID
 export const fetchCommentById = async (commentId: string): Promise<Comment> => {
   const response = await api.get(`/comments/comment/${commentId}`);
   console.log("API fetched single comment:", response.data);
   return response.data;
 };
 
-// Add a new comment to a task
 export const addTaskComment = async (commentData: {
   task_id: string;
   content: string;
@@ -219,7 +203,6 @@ export const addTaskComment = async (commentData: {
   return response.data;
 };
 
-// Update a comment
 export const updateTaskComment = async (
   commentId: string,
   content: string
@@ -229,13 +212,11 @@ export const updateTaskComment = async (
   return response.data;
 };
 
-// Delete a comment
 export const deleteTaskComment = async (commentId: string): Promise<void> => {
   await api.delete(`/comments/${commentId}`);
   console.log("API deleted comment:", commentId);
 };
 
-// Fetch user by ID (for comment authors)
 export const fetchUserById = async (userId: string): Promise<User> => {
   const response = await api.get(`/users/${userId}`);
   console.log("API fetched user:", response.data);
@@ -243,16 +224,12 @@ export const fetchUserById = async (userId: string): Promise<User> => {
 };
 
 // --- User Queries ---
-
-// Fetch all users (e.g., for assigning tasks or displaying a user directory)
 export const fetchUsers = async (): Promise<User[]> => {
   const response = await api.get("/users");
   return response.data;
 };
 
 // --- Notification Queries ---
-
-// Create a new notification
 export const createNotification = async (
   notificationData: NotificationCreateRequest
 ): Promise<Notification> => {
@@ -261,7 +238,6 @@ export const createNotification = async (
   return response.data;
 };
 
-// Get all notifications for the current user, with optional unread filter
 export const fetchNotifications = async (
   unreadOnly: boolean = false
 ): Promise<Notification[]> => {
@@ -271,7 +247,6 @@ export const fetchNotifications = async (
   return response.data;
 };
 
-// Get a specific notification by ID (Assuming this is a GET endpoint)
 export const fetchNotificationById = async (
   notificationId: string
 ): Promise<Notification> => {
@@ -280,7 +255,6 @@ export const fetchNotificationById = async (
   return response.data;
 };
 
-// Mark a notification as read
 export const markNotificationAsRead = async (
   notificationId: string
 ): Promise<Notification> => {

@@ -38,15 +38,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import ProjectBoard from "@/components/project/ProjectBoard"; // Import the ProjectBoard component
-import { getUserInitials } from "@/helpers/taskHelpers";
-
-// TODO: Import dialogs for editing project, managing members, etc.
-// import EditProjectDialog from "@/components/project/EditProjectDialog";
-// import ManageProjectMembersDialog from "@/components/project/ManageProjectMembersDialog";
-// import DeleteProjectDialog from "@/components/project/DeleteProjectDialog";
+import CreateTaskDialog from "@/components/task/CreateTaskDialog"; // Import CreateTaskDialog
+import EditProjectDialog from "@/components/project/EditProjectDialog"; // Import EditProjectDialog
+import DeleteProjectDialog from "@/components/project/DeleteProjectDialog"; // Import DeleteProjectDialog
+import ManageProjectMembersDialog from "@/components/project/ManageProjectMembersDialog"; // Import ManageProjectMembersDialog
+import InviteNewMemberDialog from "@/components/project/InviteNewMemberDialog"; // Import InviteNewMemberDialog
 
 const ProjectPage: React.FC = () => {
   const location = useLocation();
@@ -57,9 +54,16 @@ const ProjectPage: React.FC = () => {
   const { user: authUser } = useAuth();
   const queryClient = useQueryClient();
 
+  // State for controlling dialog visibility
+  const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showEditProjectDialog, setShowEditProjectDialog] = useState(false);
   const [showManageMembersDialog, setShowManageMembersDialog] = useState(false);
+  const [showInviteNewMemberDialog, setShowInviteNewMemberDialog] =
+    useState(false); // New state for invite dialog
   const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false);
+  const [initialTaskStatusForCreate, setInitialTaskStatusForCreate] = useState<
+    Task["status"] | undefined
+  >(undefined); // State to pass initial status to CreateTaskDialog
 
   // Fetch project details including tasks and members
   const {
@@ -76,6 +80,7 @@ const ProjectPage: React.FC = () => {
 
   const isOwner = project ? authUser?.user_id === project.owner_id : false;
 
+  // Mutations for Project actions
   const updateProjectMutation = useMutation<Project, Error, Partial<Project>>({
     mutationFn: (updatedData) => updateProject(projectId!, updatedData),
     onSuccess: () => {
@@ -83,7 +88,11 @@ const ProjectPage: React.FC = () => {
         queryKey: ["projectDetails", projectId],
       });
       queryClient.invalidateQueries({ queryKey: ["myLinkedProjects"] });
-      // setShowEditProjectDialog(false);
+      setShowEditProjectDialog(false); // Close dialog on success
+    },
+    onError: (err) => {
+      console.error("Failed to update project:", err);
+      // TODO: Show a user-friendly error message
     },
   });
 
@@ -91,41 +100,37 @@ const ProjectPage: React.FC = () => {
     mutationFn: () => deleteProject(projectId!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["myLinkedProjects"] });
-      navigate("/projects");
-      // setShowDeleteProjectDialog(false);
+      navigate("/projects"); // Navigate back to projects list after deletion
+      setShowDeleteProjectDialog(false); // Close dialog on success
+    },
+    onError: (err) => {
+      console.error("Failed to delete project:", err);
+      // TODO: Show a user-friendly error message
     },
   });
 
-  const inviteMemberMutation = useMutation<
-    ProjectMember,
-    Error,
-    { userId: string; role: "owner" | "member" }
-  >({
-    mutationFn: ({ userId, role }) =>
-      inviteProjectMember(projectId!, userId, role),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["projectDetails", projectId],
-      });
-    },
-  });
-
+  // Handlers for opening dialogs
   const handleEditProject = () => {
-    console.log("Open edit project dialog");
+    setShowEditProjectDialog(true);
   };
 
   const handleDeleteProject = () => {
-    console.log("Open delete project confirmation");
+    setShowDeleteProjectDialog(true);
   };
 
   const handleManageMembers = () => {
-    console.log("Open manage members dialog");
+    setShowManageMembersDialog(true);
   };
 
   const handleAddProjectTask = (status: Task["status"]) => {
-    console.log(`Add new task to project ${projectId} with status: ${status}`);
-    // Example: navigate with state to create task page
-    // navigate('/tasks/new', { state: { projectId: projectId, initialStatus: status } });
+    setInitialTaskStatusForCreate(status); // Set the initial status for the task
+    setShowCreateTaskDialog(true); // Open the create task dialog
+  };
+
+  // Handler for opening the invite member dialog from inside ManageMembersDialog
+  const handleOpenInviteMemberDialog = () => {
+    setShowManageMembersDialog(false); // Close manage members dialog first
+    setShowInviteNewMemberDialog(true); // Open invite new member dialog
   };
 
   if (!authUser) {
@@ -259,7 +264,7 @@ const ProjectPage: React.FC = () => {
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => handleAddProjectTask("not_started")}
+                onClick={() => handleAddProjectTask("not_started")} // Default status for new tasks
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" /> Add Task
@@ -337,11 +342,7 @@ const ProjectPage: React.FC = () => {
       </div>
 
       {/* Main Content Area: Kanban Board Container */}
-      {/* flex-1 allows this div to take up remaining vertical space */}
-      {/* overflow-y-auto ensures vertical scrolling for the entire board area when masonry content overflows */}
       <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-        {" "}
-        {/* Removed overflow-x-auto */}
         {!projectTasks || projectTasks.length === 0 ? (
           <div className="text-center py-20 bg-neutral-900 rounded-lg shadow-inner border border-neutral-800 mx-auto max-w-xl">
             <Briefcase className="h-24 w-24 text-gray-600 mx-auto mb-6" />
@@ -363,16 +364,58 @@ const ProjectPage: React.FC = () => {
         )}
       </div>
 
-      {/* TODO: Add dialog components here (EditProjectDialog, ManageProjectMembersDialog, DeleteProjectDialog) */}
-      {/* Example:
-      <EditProjectDialog
-        open={showEditProjectDialog}
-        onOpenChange={setShowEditProjectDialog}
-        project={project}
-        onSubmit={updateProjectMutation.mutate}
-        isSubmitting={updateProjectMutation.isPending}
+      {/* Dialog for creating new tasks */}
+      <CreateTaskDialog
+        open={showCreateTaskDialog}
+        onOpenChange={setShowCreateTaskDialog}
+        initialProjectId={projectId} // Pass the current project ID
+        initialStatus={initialTaskStatusForCreate} // Pass the initial status from the clicked column's add button
       />
-      */}
+
+      {/* Dialog for editing project details */}
+      {project && ( // Only render if project data is loaded
+        <EditProjectDialog
+          open={showEditProjectDialog}
+          onOpenChange={setShowEditProjectDialog}
+          project={project}
+          onSubmit={updateProjectMutation.mutate}
+          isSubmitting={updateProjectMutation.isPending}
+        />
+      )}
+
+      {/* Dialog for managing project members */}
+      {project &&
+        authUser && ( // Only render if project and authUser data is loaded
+          <ManageProjectMembersDialog
+            open={showManageMembersDialog}
+            onOpenChange={setShowManageMembersDialog}
+            project={project}
+            isOwner={isOwner}
+            onInviteNewMember={handleOpenInviteMemberDialog} // Pass handler to open invite dialog
+            currentUserId={authUser.user_id}
+          />
+        )}
+
+      {/* Dialog for inviting new members */}
+      {project && ( // Only render if project data is loaded
+        <InviteNewMemberDialog
+          open={showInviteNewMemberDialog}
+          onOpenChange={setShowInviteNewMemberDialog}
+          projectId={project.id}
+          projectName={project.title}
+        />
+      )}
+
+      {/* Dialog for deleting the project */}
+      {project && ( // Only render if project data is loaded
+        <DeleteProjectDialog
+          open={showDeleteProjectDialog}
+          onOpenChange={setShowDeleteProjectDialog}
+          project={project}
+          onConfirm={deleteProjectMutation.mutate}
+          isDeleting={deleteProjectMutation.isPending}
+        />
+      )}
     </div>
   );
 };
