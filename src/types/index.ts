@@ -23,6 +23,12 @@ export interface Tag {
   name: string;
 }
 
+export interface TaskMember {
+  id: string;
+  user_id: string;
+  user: User; // Include the nested user object for full details
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -48,7 +54,7 @@ export interface Task {
   created_at: string;
   updated_at: string;
   tags?: Tag[];
-  assignments?: User[];
+  assignments?: TaskMember[];
   owner: User;
   dependencies?: Task[];
   comments?: CommentResponse[];
@@ -161,4 +167,30 @@ export interface NotificationCreateRequest {
 export interface AuthResponse {
   token: string;
   user: User;
+}
+
+// Dashboard Statistics Interface
+export interface DashboardStats {
+  total_tasks: number;
+  completed_tasks: number;
+  pending_assignments: number;
+  active_projects: number;
+  recent_comments_count: number;
+}
+
+// NEW: Recent Activity Item (for displaying dynamic activity feed)
+export interface RecentActivityItem {
+  id: string;
+  type:
+    | "task_created"
+    | "task_completed"
+    | "comment_added"
+    | "assignment_created"
+    | "project_created"
+    | "project_updated";
+  description: string;
+  timestamp: string; // ISO string format (e.g., "2023-10-27T10:00:00Z")
+  actor_name: string; // Name of the user who performed the action
+  related_entity_title?: string; // Title of the task/project
+  related_entity_id?: string; // ID of the task/project
 }

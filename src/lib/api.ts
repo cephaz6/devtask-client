@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import type {
   Task,
   Project,
@@ -6,8 +6,9 @@ import type {
   User,
   ProjectMember,
   Notification,
-  NotificationType,
   NotificationCreateRequest,
+  DashboardStats,
+  RecentActivityItem,
 } from "@/types";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -263,6 +264,20 @@ export const markNotificationAsRead = async (
     `API marked notification ${notificationId} as read:`,
     response.data
   );
+  return response.data;
+};
+
+// --- Dashboard API Functions ---
+export const fetchDashboardStats = async (): Promise<DashboardStats> => {
+  const response = await axios.get("/dashboard/stats"); // Assuming a new backend endpoint
+  return response.data;
+};
+
+// NEW: Fetch Recent Activities
+export const fetchRecentActivities = async (): Promise<
+  RecentActivityItem[]
+> => {
+  const response = await axios.get("/dashboard/recent-activities");
   return response.data;
 };
 
