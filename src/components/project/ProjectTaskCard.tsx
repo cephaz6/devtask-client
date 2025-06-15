@@ -63,7 +63,7 @@ const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({ task }) => {
                  ${getPriorityBgClass(task.priority)}`} // Apply priority background here
       onClick={handleCardClick}
     >
-      <CardContent className="p-3 space-y-2">
+      <CardContent className="">
         {/* Draggable Indicator - positioned to the right of the title area */}
         <div className="absolute top-2 right-2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <GripVertical className="h-5 w-5" />
@@ -78,13 +78,6 @@ const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({ task }) => {
           </h4>
           {/* Removed Priority Badge - priority is now indicated by card background */}
         </div>
-
-        {/* Task Description (Very Short - line-clamp-1) */}
-        {task.description && (
-          <p className="text-xs text-gray-300 line-clamp-1">
-            {task.description}
-          </p>
-        )}
 
         {/* Tags */}
         {task.tags && task.tags.length > 0 && (

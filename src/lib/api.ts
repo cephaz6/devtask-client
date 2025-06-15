@@ -173,7 +173,7 @@ export const updateTaskAssignments = async (
   id: string,
   userIds: string[]
 ): Promise<Task> => {
-  const response = await api.put(`/tasks/${id}/assignments`, {
+  const response = await api.put(`/tasks/assignments/${id}/assignments`, {
     user_ids: userIds,
   });
   console.log(`Assignments for task ${id} updated:`, response.data);

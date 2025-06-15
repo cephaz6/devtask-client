@@ -1,19 +1,12 @@
 // src/pages/ProjectPage.tsx
 import React, { useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  fetchProjectDetails,
-  updateProject,
-  deleteProject,
-  inviteProjectMember,
-  removeProjectMember,
-  updateProjectMemberRole,
-} from "@/lib/api";
+import { fetchProjectDetails, updateProject, deleteProject } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import type { Project, Task, User, ProjectMember } from "@/types";
+import type { Project, Task } from "@/types";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -23,7 +16,6 @@ import {
   Edit,
   MoreHorizontal,
   Plus,
-  Loader2,
   Frown,
   Share,
   Archive,
@@ -190,7 +182,7 @@ const ProjectPage: React.FC = () => {
               <Frown className="inline-block mr-2" /> Error loading project:{" "}
               {error?.message || "Unknown error"}
             </p>
-            <Button onClick={() => navigate("/projects")} className="mt-4">
+            <Button onClick={() => navigate("../projects")} className="mt-4">
               Go to Projects List
             </Button>
           </CardContent>
@@ -205,7 +197,7 @@ const ProjectPage: React.FC = () => {
         <Card className="w-96 bg-neutral-900 text-gray-100">
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground">Project not found.</p>
-            <Button onClick={() => navigate("/projects")} className="mt-4">
+            <Button onClick={() => navigate("../projects")} className="mt-4">
               Go to Projects List
             </Button>
           </CardContent>
@@ -229,7 +221,7 @@ const ProjectPage: React.FC = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate("/projects")}
+                onClick={() => navigate("../projects")}
                 className="text-gray-400 hover:text-blue-400"
               >
                 <ArrowLeft className="h-5 w-5" />

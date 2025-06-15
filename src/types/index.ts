@@ -104,7 +104,7 @@ export interface ProjectMember {
   user_id: string;
   project_id: string;
   role: "owner" | "member";
-  user?: User; // Include the nested user object for full details
+  user: User; // Include the nested user object for full details
 }
 
 // Updated Project to include members and tasks
