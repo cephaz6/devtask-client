@@ -2,15 +2,20 @@
 import React, { useState, useMemo } from "react";
 import type { Task } from "@/types";
 import ProjectTaskCard from "./ProjectTaskCard";
-import { Plus, SortAsc } from "lucide-react";
+import { Plus, SortAsc, Clock, Calendar, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ProjectColumnProps {
   title: string;
@@ -57,12 +62,7 @@ const ProjectColumn: React.FC<ProjectColumnProps> = ({
   }, [tasks, sortBy]);
 
   return (
-    // Column container: flex-col to stack header and tasks.
-    // `w-[300px]` maintains a consistent width for columns in the masonry layout.
-    // `min-h-[150px]` ensures it has a base height.
-    // No `h-full` here, as the height should be determined by content for masonry.
     <div className="flex flex-col bg-neutral-900 rounded-lg p-4 shadow-xl min-w-[280px] w-[300px]">
-      {/* Column Header */}
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-neutral-700">
         <h3 className="text-lg font-semibold text-gray-50">
           {title} ({tasks.length})
@@ -74,19 +74,50 @@ const ProjectColumn: React.FC<ProjectColumnProps> = ({
               setSortBy(value)
             }
           >
-            <SelectTrigger className="w-fit h-7 text-xs bg-neutral-800 border-neutral-700 text-gray-400">
-              <SortAsc className="h-3 w-3 mr-1" />
-              <SelectValue placeholder="Sort" />
+            <SelectTrigger className="w-fit h-7 text-xs bg-neutral-800 border-neutral-700 text-gray-400 px-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {/* Corrected: Render only one child based on sortBy */}
+                    {
+                      sortBy === "created_at" ? (
+                        <Clock className="h-4 w-4" />
+                      ) : sortBy === "due_date" ? (
+                        <Calendar className="h-4 w-4" />
+                      ) : sortBy === "priority" ? (
+                        <Zap className="h-4 w-4" />
+                      ) : (
+                        <span className="h-4 w-4" />
+                      ) // Fallback empty span if no match
+                    }
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-neutral-700 text-gray-50 text-xs">
+                    {sortBy === "created_at" && "Sort by Date Created"}
+                    {sortBy === "due_date" && "Sort by Due Date"}
+                    {sortBy === "priority" && "Sort by Priority"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <SortAsc className="h-3 w-3 ml-1" />
             </SelectTrigger>
             <SelectContent className="bg-neutral-800 text-gray-50 border-neutral-700">
-              <SelectItem value="created_at" className="text-xs">
-                Date Created
+              <SelectItem
+                value="created_at"
+                className="text-xs flex items-center gap-2"
+              >
+                <Clock className="h-3 w-3" /> Date Created
               </SelectItem>
-              <SelectItem value="due_date" className="text-xs">
-                Due Date
+              <SelectItem
+                value="due_date"
+                className="text-xs flex items-center gap-2"
+              >
+                <Calendar className="h-3 w-3" /> Due Date
               </SelectItem>
-              <SelectItem value="priority" className="text-xs">
-                Priority
+              <SelectItem
+                value="priority"
+                className="text-xs flex items-center gap-2"
+              >
+                <Zap className="h-3 w-3" /> Priority
               </SelectItem>
             </SelectContent>
           </Select>
@@ -103,9 +134,6 @@ const ProjectColumn: React.FC<ProjectColumnProps> = ({
         </div>
       </div>
 
-      {/* Task List - vertical scroll for tasks within the column */}
-      {/* `flex-1` ensures this div takes all available vertical space in the column */}
-      {/* `overflow-y-auto` enables vertical scrolling for tasks if they overflow */}
       <div className="flex-1 overflow-y-auto pr-2 -mr-2 custom-scrollbar">
         {tasks.length === 0 ? (
           <p className="text-sm text-gray-500 text-center py-4">

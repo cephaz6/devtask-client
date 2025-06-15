@@ -87,7 +87,7 @@ const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!title.trim() || isSubmitting}
+            // disabled={!title.trim() || isSubmitting}
             className="bg-blue-600 hover:bg-blue-700"
           >
             {isSubmitting ? "Saving..." : "Save Changes"}

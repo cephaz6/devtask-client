@@ -224,7 +224,7 @@ const TaskPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] }); // Invalidate the tasks list page
       setDeleteDialogOpen(false); // Close the dialog
-      navigate("./tasks"); // Navigate back to the tasks list
+      navigate("/tasks"); // Navigate back to the tasks list
       // TODO: Optionally show a success toast/message
     },
     onError: (err) => {
@@ -239,7 +239,7 @@ const TaskPage = () => {
       queryClient.invalidateQueries({ queryKey: ["taskBase", taskId] }); // Invalidate current task
       queryClient.invalidateQueries({ queryKey: ["tasks"] }); // Invalidate the tasks list if it shows archived tasks
       setArchiveDialogOpen(false); // Close the dialog
-      navigate("./tasks"); // Navigate back as the task might be hidden from active lists
+      navigate("/tasks"); // Navigate back as the task might be hidden from active lists
       // TODO: Optionally show a success toast/message
     },
     onError: (err) => {

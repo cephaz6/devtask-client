@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar as CalendarIcon, Tag, X, Plus, Activity } from "lucide-react";
+import { Calendar as CalendarIcon, Tag, X, Plus } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -28,20 +28,23 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import type { Task } from "@/types";
+import type { Task, TaskUpdatePayload } from "@/types"; // Import TaskUpdatePayload
 
+// Aligned status options to match backend TaskStatus enum exactly
 const statusOptions = [
+  { value: "not_started", label: "Not Started", icon: "📄" },
   { value: "pending", label: "Pending", icon: "⏳" },
   { value: "in_progress", label: "In Progress", icon: "🔄" },
+  { value: "on_hold", label: "On Hold", icon: "⏸️" },
   { value: "completed", label: "Completed", icon: "✅" },
-  { value: "blocked", label: "Blocked", icon: "🚫" },
+  { value: "cancelled", label: "Cancelled", icon: "❌" },
 ];
 
 interface EditTaskDialogProps {
   open: boolean;
   onOpenChange: (val: boolean) => void;
   task: Task;
-  onSubmit: (updatedTask: Partial<Task>) => void;
+  onSubmit: (updatedTask: TaskUpdatePayload) => void; // Changed to TaskUpdatePayload
   isSubmitting?: boolean;
   isOwner: boolean; // To control due date editing
 }
@@ -56,8 +59,7 @@ const EditTaskDialog = ({
 }: EditTaskDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("");
-  const [progress, setProgress] = useState("0");
+  const [status, setStatus] = useState<Task["status"]>("not_started"); // Explicitly type status
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
@@ -67,9 +69,9 @@ const EditTaskDialog = ({
     if (open && task) {
       setTitle(task.title || "");
       setDescription(task.description || "");
-      setStatus(task.status || "pending");
-      setProgress(task.status?.toString() || "0");
+      setStatus(task.status || "not_started");
       setDueDate(task.due_date ? new Date(task.due_date) : undefined);
+      // Ensure tags are initialized as string[] from Task.tags: Tag[]
       setTags(task.tags?.map((tag) => tag.name) || []);
       setTagInput("");
     }
@@ -95,17 +97,17 @@ const EditTaskDialog = ({
   };
 
   const handleSubmit = async () => {
-    const updatedData: Partial<Task> = {
+    const updatedData: TaskUpdatePayload = {
+      // Now explicitly typed as TaskUpdatePayload
       title,
       description,
-      status,
-      progress: parseInt(progress),
-      tags: tags.map((tagName) => ({ name: tagName })),
+      status, // This is type-checked against TaskUpdatePayload
+      tags: tags, // This is now correctly string[] for TaskUpdatePayload
     };
 
-    // Only include due_date if user is owner
+    // Only include due_date if user is owner and it's defined
     if (isOwner) {
-      updatedData.due_date = dueDate;
+      updatedData.due_date = dueDate?.toISOString(); // Convert Date to ISO string for backend
     }
 
     onSubmit(updatedData);
@@ -113,12 +115,11 @@ const EditTaskDialog = ({
 
   const handleCancel = () => {
     onOpenChange(false);
-    // Reset form to original values
+    // Reset form to original values if task exists
     if (task) {
       setTitle(task.title || "");
       setDescription(task.description || "");
-      setStatus(task.status || "pending");
-      setProgress(task.status?.toString() || "0");
+      setStatus(task.status || "not_started");
       setDueDate(task.due_date ? new Date(task.due_date) : undefined);
       setTags(task.tags?.map((tag) => tag.name) || []);
       setTagInput("");
@@ -177,22 +178,6 @@ const EditTaskDialog = ({
               </Select>
             </div>
 
-            <div>
-              <Label className="text-sm font-medium flex items-center gap-1">
-                <Activity className="h-4 w-4" />
-                Progress (%) 📈
-              </Label>
-              <Input
-                value={progress}
-                onChange={(e) => setProgress(e.target.value)}
-                type="number"
-                min="0"
-                max="100"
-                className="mt-1"
-                placeholder="0"
-              />
-            </div>
-
             {/* Due Date - Only editable by owner */}
             <div>
               <Label className="text-sm font-medium">
@@ -210,7 +195,7 @@ const EditTaskDialog = ({
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "MMM dd, yyyy") : "Pick date"}
+                    {dueDate ? format(dueDate, "MMM dd,yyyy") : "Pick date"}
                   </Button>
                 </PopoverTrigger>
                 {isOwner && (

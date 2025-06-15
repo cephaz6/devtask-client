@@ -2,10 +2,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tag, GripVertical, Users, MessageSquare } from "lucide-react"; // Added Users and MessageSquare icons
+import { Badge } from "@/components/ui/badge"; // Keeping Badge for tags for now
+import { Tag, GripVertical, Users, MessageSquare } from "lucide-react";
 import type { Task } from "@/types";
-import { getStatusConfig } from "@/helpers/taskHelpers";
 
 interface ProjectTaskCardProps {
   task: Task;
@@ -15,24 +14,22 @@ const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({ task }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`../tasks/${task.id}`); // Navigate to the existing single task page
+    navigate(`../tasks/${task.id}`);
   };
 
-  const statusConfig = getStatusConfig(task.status);
-
-  // Helper for priority color badge - more vibrant and direct
-  const getPriorityColorClass = (
+  // Helper for priority-based background class
+  const getPriorityBgClass = (
     priority: Task["priority"] | null | undefined
   ) => {
     switch (priority) {
       case "high":
-        return "bg-red-700/50 text-red-200 border-red-600";
+        return "bg-red-900/40 border-red-800"; // Darker, more prominent red
       case "medium":
-        return "bg-yellow-700/50 text-yellow-200 border-yellow-600";
+        return "bg-yellow-900/40 border-yellow-800"; // Darker yellow
       case "low":
-        return "bg-green-700/50 text-green-200 border-green-600";
+        return "bg-green-900/40 border-green-800"; // Darker green
       default:
-        return "bg-gray-700/50 text-gray-200 border-gray-600";
+        return "bg-neutral-800 border-neutral-700"; // Default dark background
     }
   };
 
@@ -60,37 +57,34 @@ const ProjectTaskCard: React.FC<ProjectTaskCardProps> = ({ task }) => {
 
   return (
     <Card
-      className="bg-neutral-800 text-gray-100 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer
-                 transform hover:-translate-y-0.5 hover:scale-[1.01] border border-neutral-700 relative group"
+      // Apply the priority background and border directly to the card
+      className={`rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer
+                 transform hover:-translate-y-0.5 hover:scale-[1.01] relative group
+                 ${getPriorityBgClass(task.priority)}`} // Apply priority background here
       onClick={handleCardClick}
     >
-      <CardContent className="px-2 space-y-1">
+      <CardContent className="p-3 space-y-2">
         {/* Draggable Indicator - positioned to the right of the title area */}
-        <div className="absolute top-2  text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-2 right-2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <GripVertical className="h-5 w-5" />
         </div>
 
-        {/* Task Title and Priority Badge */}
+        {/* Task Title (smaller font) */}
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h4 className="font-semibold text-base leading-tight text-gray-50 flex-1 pr-6">
+          <h4 className="font-semibold text-sm leading-tight text-gray-50 flex-1 pr-6">
+            {" "}
+            {/* Changed text-base to text-sm */}
             {task.title}
           </h4>
-          <Badge
-            className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${getPriorityColorClass(
-              task.priority
-            )}`}
-          >
-            {(task.priority ?? "Unknown").charAt(0).toUpperCase() +
-              (task.priority ?? "Unknown").slice(1)}
-          </Badge>
+          {/* Removed Priority Badge - priority is now indicated by card background */}
         </div>
 
         {/* Task Description (Very Short - line-clamp-1) */}
-        {/* {task.description && (
+        {task.description && (
           <p className="text-xs text-gray-300 line-clamp-1">
             {task.description}
           </p>
-        )} */}
+        )}
 
         {/* Tags */}
         {task.tags && task.tags.length > 0 && (

@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { Separator } from "../../../components/ui/separator";
+// Assuming CreateTaskDialog is located at '@/components/CreateTaskDialog' for consistency
 import CreateTaskDialog from "@/components/task/CreateTaskDialog";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -50,7 +51,7 @@ const Tasks = () => {
     queryFn: fetchTasks, // fetchTasks function from api.ts now calls /tasks/my-tasks
   });
 
-  // Helper function to determine status badge color
+  // Helper function to determine status badge color - UPDATED
   const getStatusColor = (status: Task["status"]) => {
     switch (status) {
       case "completed":
@@ -59,7 +60,11 @@ const Tasks = () => {
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "not_started":
         return "bg-gray-100 text-gray-800 border-gray-200";
-      case "blocked":
+      case "on_hold": // Added on_hold status
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "pending": // Added pending status
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "cancelled": // Added cancelled status
         return "bg-red-100 text-red-800 border-red-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
@@ -87,9 +92,10 @@ const Tasks = () => {
         // Map 'todo' filter to 'not_started' status if applicable
         if (filterStatus === "todo" && task.status === "not_started")
           return true;
+        // Direct comparison for other statuses
         return task.status === filterStatus;
       })
-    : []; // If tasks is null/undefined, return empty array to prevent errors
+    : [];
 
   // Groups the filtered tasks based on the selected grouping option.
   const groupTasks = (tasksToGroup: Task[]) => {
@@ -99,7 +105,8 @@ const Tasks = () => {
       let key: string;
       switch (groupBy) {
         case "project":
-          key = task.project_id || "Unassigned Project";
+          // Use project title if available, otherwise "Unassigned Project"
+          key = task.project_id || "Unassigned Project"; // You might need to fetch project details to get the name
           break;
         case "status":
           key = task.status.replace(/_/g, " ").toUpperCase();
@@ -121,7 +128,7 @@ const Tasks = () => {
 
   const groupedTasks = groupTasks(filteredTasks);
 
-  // TaskCard component for grid view
+  // TaskCard component for grid view - UPDATED Owner Info
   const TaskCard = ({ task }: { task: Task }) => (
     <Link to={`/dashboard/tasks/${task.id}`} className="block">
       <Card className="hover:shadow-md transition-shadow cursor-pointer group">
@@ -144,7 +151,7 @@ const Tasks = () => {
             {task.tags &&
               task.tags.map((tag) => (
                 <Badge
-                  key={tag.id || tag.name} // Use id if available, fallback to name
+                  key={tag.id || tag.name}
                   variant="outline"
                   className="text-xs"
                 >
@@ -155,11 +162,12 @@ const Tasks = () => {
 
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center gap-1">
-              <User className="h-3 w-3 text-gray-400" />
-              {/* Display assigned user's ID or task creator's ID */}
-              {task.assignments && task.assignments.length > 0
-                ? task.assignments[0].user_id
-                : task.user_id || "Unassigned"}
+              <User className="h-3 w-3" />
+              {/* Display assigned user's name or owner's name/email - UPDATED */}
+              {task.owner?.full_name ||
+                task.owner?.email ||
+                task.owner_id ||
+                "Unassigned"}
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
@@ -179,7 +187,7 @@ const Tasks = () => {
     </Link>
   );
 
-  // TaskRow component for list view
+  // TaskRow component for list view - UPDATED Owner Info
   const TaskRow = ({ task }: { task: Task }) => (
     <Link to={`/dashboard/tasks/${task.id}`} className="block">
       <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer group">
@@ -190,7 +198,7 @@ const Tasks = () => {
           >
             {task.title}
           </h3>
-          <p className="text-sm `text-gray-600` truncate">{task.description}</p>
+          <p className="text-sm text-gray-600 truncate">{task.description}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -203,10 +211,11 @@ const Tasks = () => {
           </Badge>
 
           <div className="text-xs text-gray-500 min-w-20">
-            {task.assignments && task.assignments.length > 0
-              ? task.assignments[0].user_id
-              : task.owner_id || "Unassigned"}{" "}
-            {/* Corrected to user_id for task creator */}
+            {/* Display assigned user's name or owner's name/email - UPDATED */}
+            {task.owner?.full_name ||
+              task.owner?.email ||
+              task.owner_id ||
+              "Unassigned"}
           </div>
 
           <div className="text-xs text-gray-500 min-w-24">
@@ -326,7 +335,7 @@ const Tasks = () => {
               </Select>
             </div>
 
-            {/* Filter By Status Select */}
+            {/* Filter By Status Select - UPDATED */}
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-40">
                 <Filter className="h-4 w-4 mr-2" />
@@ -334,10 +343,17 @@ const Tasks = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All tasks</SelectItem>
-                <SelectItem value="todo">To do</SelectItem>
-                <SelectItem value="in_progress">In progress</SelectItem>
+                <SelectItem value="not_started">Not Started</SelectItem>{" "}
+                {/* Changed from "todo" */}
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>{" "}
+                {/* Added pending */}
+                <SelectItem value="on_hold">On Hold</SelectItem>{" "}
+                {/* Added on_hold */}
                 <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="blocked">Blocked</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>{" "}
+                {/* Added cancelled */}
+                {/* Removed "blocked" as per backend enum */}
               </SelectContent>
             </Select>
           </div>
@@ -390,6 +406,9 @@ const Tasks = () => {
       <CreateTaskDialog
         open={openCreateTask}
         onOpenChange={setOpenCreateTask}
+        // When creating a task from the general Tasks page, no initialProjectId is passed
+        initialProjectId={null}
+        initialStatus={"not_started"} // Default status for general task creation
       />
     </div>
   );

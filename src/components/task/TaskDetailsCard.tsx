@@ -1,30 +1,21 @@
-// src/components/tasks/TaskDetailsCard.tsx
+// src/components/task/TaskDetailsCard.tsx
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-// Import Avatar and AvatarFallback for the creator section
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   TrendingUp,
   Timer,
-  Flame,
-  Zap,
-  Target,
-  CheckCircle2,
-  Clock,
-  Circle,
   FileText, // Keep FileText for description icon
-} from "lucide-react";
+} from "lucide-react"; // Removed Flame, Zap, Target, CheckCircle2, Clock, Circle as icons are now from getStatusConfig.icon
 import {
   getProgressFromStatus,
   getPriorityConfig,
   getStatusConfig,
+  getUserInitials, // Explicitly import getUserInitials
 } from "@/helpers/taskHelpers";
-import type { Task, User } from "@/types"; // Import User type
-
-// Assuming getUserInitials is still in taskHelpers for consistency with Assignees
-import { getUserInitials } from "@/helpers/taskHelpers";
+import type { Task, User } from "@/types";
 
 interface TaskDetailsCardProps {
   task: Task;
@@ -35,35 +26,17 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
   const priorityConfig = getPriorityConfig(task.priority);
   const statusConfig = getStatusConfig(task.status);
 
-  // Helper for getting initials from a User object (re-using getUserInitials from taskHelpers)
-  const getCreatorInitials = (user: User | undefined | null) => {
-    if (!user) return "NA";
-    return getUserInitials(user); // Assuming getUserInitials works with a User object
-  };
-
-  const getPriorityIcon = (priority: string) => {
+  // Helper for getting priority Lucide icon - using a direct return from the config
+  const getPriorityLucideIcon = (priority: Task["priority"]) => {
     switch (priority) {
       case "high":
-        return <Flame className="w-3 h-3 text-red-500" />;
+        return <TrendingUp className="w-3 h-3 text-red-500" />; // Using TrendingUp for high priority
       case "medium":
-        return <Zap className="w-3 h-3 text-yellow-500" />;
+        return <TrendingUp className="w-3 h-3 text-yellow-500" />; // Using TrendingUp for medium priority
       case "low":
-        return <Target className="w-3 h-3 text-green-500" />;
+        return <TrendingUp className="w-3 h-3 text-green-500" />; // Using TrendingUp for low priority
       default:
-        return <Target className="w-3 h-3 text-gray-500" />;
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle2 className="w-3 h-3 text-green-500" />;
-      case "in_progress":
-        return <Clock className="w-3 h-3 text-blue-500" />;
-      case "blocked":
-        return <Circle className="w-3 h-3 text-red-500" />;
-      default:
-        return <Circle className="w-3 h-3 text-gray-400" />;
+        return <TrendingUp className="w-3 h-3 text-gray-500" />;
     }
   };
 
@@ -111,13 +84,19 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
           <div className="p-2.5 rounded-md border border-border/30 bg-background/50 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                {getPriorityIcon(task.priority)}
+                {getPriorityLucideIcon(task.priority)} {/* Using Lucide Icon */}
                 <span className="text-xs font-medium text-muted-foreground">
                   Priority
                 </span>
               </div>
               <Badge
-                variant={priorityConfig.variant}
+                variant={
+                  priorityConfig.variant as
+                    | "default"
+                    | "secondary"
+                    | "destructive"
+                    | "outline"
+                }
                 className="text-xs px-2 py-0.5 h-5"
               >
                 {priorityConfig.text}
@@ -129,13 +108,22 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
           <div className="p-2.5 rounded-md border border-border/30 bg-background/50 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                {getStatusIcon(task.status)}
+                {/* Use the emoji/icon from getStatusConfig directly */}
+                <span className="text-base leading-none">
+                  {statusConfig.icon}
+                </span>
                 <span className="text-xs font-medium text-muted-foreground">
                   Status
                 </span>
               </div>
               <Badge
-                variant={statusConfig.variant}
+                variant={
+                  statusConfig.variant as
+                    | "default"
+                    | "secondary"
+                    | "destructive"
+                    | "outline"
+                }
                 className={`text-xs px-2 py-0.5 h-5 ${statusConfig.className}`}
               >
                 {statusConfig.text}
@@ -164,18 +152,18 @@ const TaskDetailsCard: React.FC<TaskDetailsCardProps> = ({ task }) => {
           {/* Creator - 20% width (1/5 columns) */}
           <div className="col-span-1 p-3 rounded-md border border-border/30 bg-background/50 shadow-sm flex flex-col items-center justify-center">
             <Avatar className="w-8 h-8 mb-2">
-              {/* Use task.owner?.profile_picture_url if available */}
-              {/* <AvatarImage src={task.owner?.profile_picture_url} alt={task.owner?.full_name || "Creator"} /> */}
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-semibold">
-                {getCreatorInitials(task.owner)}
+                {getUserInitials(task.owner)}
               </AvatarFallback>
             </Avatar>
             <div className="text-center">
               <p className="text-xs font-medium text-muted-foreground mb-0.5">
-                Creator
+                {/* Creator */}
               </p>
               <p className="text-xs text-foreground font-medium leading-tight line-clamp-1">
-                {task.owner?.full_name || "Unknown"}
+                {task.owner?.full_name ||
+                  task.owner?.email?.split("@")[0] ||
+                  "Unknown"}
               </p>
             </div>
           </div>

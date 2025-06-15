@@ -82,7 +82,6 @@ const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
       setTagInput("");
       setEstimatedTime("0.25");
       setActualTime("0.25");
-      // If initialProjectId is provided, use it; otherwise, default to 'no-project-selected'
       setProjectIdSelectValue(initialProjectId || "no-project-selected");
     }
   }, [open, initialProjectId, initialStatus]);
@@ -112,12 +111,11 @@ const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Determine the project ID to send to the backend
     const finalProjectId = initialProjectId
-      ? initialProjectId // Use the initialProjectId if dialog was opened from a project context
+      ? initialProjectId
       : projectIdSelectValue === "no-project-selected"
       ? null
-      : projectIdSelectValue; // Otherwise, use selected value or null
+      : projectIdSelectValue;
 
     const payload = {
       title,
@@ -184,59 +182,8 @@ const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
           {/* Grid Layout for Main Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div>
-              <Label className="text-sm font-medium">Priority 🚦</Label>
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  {priorityLevels.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      <span
-                        className={cn(
-                          "font-medium",
-                          level === "high" && "text-red-600",
-                          level === "medium" && "text-yellow-600",
-                          level === "low" && "text-green-600"
-                        )}
-                      >
-                        {level.charAt(0).toUpperCase() + level.slice(1)}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Due Date 📅</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal mt-1",
-                      !dueDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "MMM dd,yyyy") : "Pick date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={dueDate}
-                    onSelect={setDueDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
             {/* Conditionally render the Project Select field */}
-            {!initialProjectId && ( // Only show if initialProjectId is NOT provided
+            {!initialProjectId && (
               <div>
                 <Label className="text-sm font-medium">Project 📂</Label>
                 <Select
@@ -276,6 +223,57 @@ const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
                 </Select>
               </div>
             )}
+
+            <div>
+              <Label className="text-sm font-medium">Due Date 📅</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal mt-1",
+                      !dueDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dueDate ? format(dueDate, "MMM dd,yyyy") : "Pick date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dueDate}
+                    onSelect={setDueDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium">Priority 🚦</Label>
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorityLevels.map((level) => (
+                    <SelectItem key={level} value={level}>
+                      <span
+                        className={cn(
+                          "font-medium",
+                          level === "high" && "text-red-600",
+                          level === "medium" && "text-yellow-600",
+                          level === "low" && "text-green-600"
+                        )}
+                      >
+                        {level.charAt(0).toUpperCase() + level.slice(1)}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Time Tracking Row */}

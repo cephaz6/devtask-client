@@ -1,23 +1,31 @@
-// src/utils/task-helpers.ts
+// src/helpers/taskHelpers.ts
 
-import type { User, CommentResponse } from "@/types"; // Import necessary types
+import type { User, CommentResponse, Task } from "@/types"; // Import necessary types
 
 /**
  * Generates initials from a user's full name or email.
+ * Handles cases where full_name might be null.
  */
 export const getUserInitials = (userData: User | null | undefined): string => {
-  if (userData?.full_name && userData.full_name.trim()) {
-    return userData.full_name
-      .split(" ")
-      .map((name) => name.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  if (!userData) {
+    return "?"; // Return a placeholder if no user data
   }
-  if (userData?.email && userData.email.trim()) {
+
+  if (userData.full_name && userData.full_name.trim()) {
+    const parts = userData.full_name.trim().split(" ");
+    if (parts.length > 1) {
+      return (
+        parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+      ).toUpperCase();
+    }
+    return parts[0].charAt(0).toUpperCase();
+  }
+
+  if (userData.email && userData.email.trim()) {
     return userData.email.charAt(0).toUpperCase();
   }
-  return "??";
+
+  return "?";
 };
 
 /**
@@ -28,14 +36,12 @@ export const organizeComments = (
 ): CommentResponse[] => {
   const commentMap = new Map<string, CommentResponse>();
 
-  // First pass: create comment objects and initialize replies array
   comments.forEach((comment) => {
     commentMap.set(comment.id, { ...comment, replies: [] });
   });
 
   const rootComments: CommentResponse[] = [];
 
-  // Second pass: organize into parent-child relationships using 'replies'
   comments.forEach((comment) => {
     const commentWithReplies = commentMap.get(comment.id);
     if (!commentWithReplies) return;
@@ -44,18 +50,19 @@ export const organizeComments = (
       const parent = commentMap.get(comment.parent_comment_id);
       if (parent) {
         parent.replies = parent.replies || [];
-        parent.replies.push(commentWithReplies);
+        if (
+          !parent.replies.some((reply) => reply.id === commentWithReplies.id)
+        ) {
+          parent.replies.push(commentWithReplies);
+        }
       } else {
-        // Parent not found (e.g., parent deleted or out of fetched scope), treat as root comment
         rootComments.push(commentWithReplies);
       }
     } else {
-      // No parent_comment_id, it's a root comment
       rootComments.push(commentWithReplies);
     }
   });
 
-  // Helper to recursively sort comments by created_at
   const sortCommentsRecursively = (commentsArray: CommentResponse[]) => {
     commentsArray.sort(
       (a, b) =>
@@ -75,17 +82,22 @@ export const organizeComments = (
 
 /**
  * Determines task progress based on its status.
+ * Aligned with backend TaskStatus enum.
  */
-export const getProgressFromStatus = (status: string): number => {
+export const getProgressFromStatus = (status: Task["status"]): number => {
   switch (status) {
     case "not_started":
       return 0;
+    case "pending":
+      return 10;
     case "in_progress":
       return 50;
+    case "on_hold":
+      return 60;
     case "completed":
       return 100;
-    case "blocked":
-      return 25;
+    case "cancelled":
+      return 100;
     default:
       return 0;
   }
@@ -94,12 +106,12 @@ export const getProgressFromStatus = (status: string): number => {
 /**
  * Returns configuration for task priority display (badge variant, icon, emoji).
  */
-export const getPriorityConfig = (priority: string) => {
+export const getPriorityConfig = (priority: Task["priority"]) => {
   switch (priority) {
     case "high":
       return {
-        variant: "destructive", // Type assertion for union types
-        icon: "🔥", // Using emoji directly as placeholder for LucideIcon
+        variant: "destructive",
+        icon: "🔥",
         text: "High",
       };
     case "medium":
@@ -125,36 +137,51 @@ export const getPriorityConfig = (priority: string) => {
 
 /**
  * Returns configuration for task status display (badge variant, class, icon, emoji, text).
+ * Aligned with backend TaskStatus enum and frontend Task type.
  */
-export const getStatusConfig = (status: string) => {
+export const getStatusConfig = (status: Task["status"]) => {
   switch (status) {
-    case "completed":
+    case "not_started":
+      return {
+        variant: "secondary",
+        className: "bg-gray-700 text-gray-200 border-gray-600",
+        icon: "📄",
+        text: "Not Started",
+      };
+    case "pending":
       return {
         variant: "default",
-        className: "bg-green-500 hover:bg-green-600",
-        icon: "✅",
-        text: "Completed",
+        className: "bg-purple-600 text-white border-purple-700",
+        icon: "⏳",
+        text: "Pending",
       };
     case "in_progress":
       return {
         variant: "default",
-        className: "bg-blue-500 hover:bg-blue-600",
+        className: "bg-blue-600 text-white border-blue-700",
         icon: "🔄",
         text: "In Progress",
       };
-    case "not_started":
+    case "on_hold":
       return {
-        variant: "secondary",
-        className: "",
+        variant: "default",
+        className: "bg-orange-600 text-white border-orange-700",
         icon: "⏸️",
-        text: "Not Started",
+        text: "On Hold",
       };
-    case "blocked":
+    case "completed":
+      return {
+        variant: "default",
+        className: "bg-green-600 text-white border-green-700",
+        icon: "✅",
+        text: "Completed",
+      };
+    case "cancelled":
       return {
         variant: "destructive",
-        className: "",
+        className: "bg-red-600 text-white border-red-700",
         icon: "🚫",
-        text: "Blocked",
+        text: "Cancelled",
       };
     default:
       return {
