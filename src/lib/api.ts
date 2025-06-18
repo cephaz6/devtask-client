@@ -119,6 +119,28 @@ export const updateProjectMemberRole = async (
   return response.data;
 };
 
+// Accept invite to project
+export const acceptInvite = async (
+  projectId: string,
+  userId: string
+): Promise<void> => {
+  await api.post("/project-members/accept-invite", {
+    project_id: projectId,
+    user_id: userId,
+  });
+};
+
+// Decline project invitation
+export const declineInvite = async (
+  projectId: string,
+  userId: string
+): Promise<void> => {
+  await api.post("/project-members/decline-invite", {
+    project_id: projectId,
+    user_id: userId,
+  });
+};
+
 export const removeProjectMember = async (
   projectId: string,
   userId: string

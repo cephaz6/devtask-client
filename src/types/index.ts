@@ -131,27 +131,22 @@ export interface Project {
 // --- Notification Types ---
 
 // Replaced enum with a const object for better compatibility in isolatedModules environments
-export const NotificationType = {
-  GENERAL: "GENERAL",
-  INVITE: "INVITE",
-  COMMENT: "COMMENT",
-  ASSIGNMENT: "ASSIGNMENT",
-} as const; // 'as const' makes it a readonly tuple, allowing string literal types
-
-// Infer type from the const object for type safety
 export type NotificationType =
-  (typeof NotificationType)[keyof typeof NotificationType];
+  | "general"
+  | "comment"
+  | "comment_reply"
+  | "task_assignment"
+  | "project_invite";
 
-// Interface for a Notification object
 export interface Notification {
   id: string;
   recipient_user_id: string;
   message: string;
-  related_task_id?: string | null;
-  related_project_id?: string | null;
-  type: NotificationType; // Using the inferred type
+  related_task_id?: string;
+  related_project_id?: string;
+  type: NotificationType;
   is_read: boolean;
-  created_at: string; // ISO string format
+  created_at: string;
 }
 
 // Interface for creating a notification (request body)

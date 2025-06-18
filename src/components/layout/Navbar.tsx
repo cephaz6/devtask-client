@@ -20,6 +20,7 @@ import {
 import { ModeToggle } from "./mode-toggle";
 import { useSidebar } from "../providers/SidebarProvider";
 import { useAuth } from "@/context/AuthContext";
+import NotificationBell from "../navbar/NotificationBell";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -36,7 +37,7 @@ const Navbar = () => {
       </button>
       <div className="flex items-center gap-4">
         <Link to={"/dashboard"}>Dashboard</Link>
-
+        <NotificationBell /> {/* <- Add this */}
         <ModeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger>

@@ -134,12 +134,9 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
                     <div className="flex-1">
                       <p className="font-medium text-gray-50 flex items-center">
                         {task.owner.full_name || task.owner.email}
-                        <span className="ml-2 text-yellow-400 text-sm">
-                          (Owner)
-                        </span>
                       </p>
                       <p className="text-sm text-gray-400">
-                        {task.owner.email}
+                        <span className="text-yellow-400 text-sm">Owner</span>
                       </p>
                     </div>
                   </div>
