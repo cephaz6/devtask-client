@@ -12,6 +12,7 @@ import Register from "./pages/auth/Register";
 import ProfilePage from "./pages/dashboard/user/Profile";
 import TaskPage from "./pages/dashboard/task/TaskPage";
 import ProjectPage from "./pages/dashboard/project/ProjectPage";
+import Copilot from "./pages/dashboard/copilot/Copilot";
 
 const App = () => {
   return (
@@ -41,6 +42,8 @@ const App = () => {
             <Route path="projects/:id" element={<ProjectPage />} />
 
             <Route path="my-profile" element={<ProfilePage />} />
+
+            <Route path="co-pilot" element={<Copilot />} />
           </Route>
 
           {/* Catch-all */}

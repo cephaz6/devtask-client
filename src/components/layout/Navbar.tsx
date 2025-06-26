@@ -20,7 +20,7 @@ import {
 import { ModeToggle } from "./mode-toggle";
 import { useSidebar } from "../providers/SidebarProvider";
 import { useAuth } from "@/context/AuthContext";
-import NotificationBell from "../navbar/NotificationBell";
+import NotificationBell from "../project/navbar/NotificationBell";
 
 const Navbar = () => {
   const { user, logout } = useAuth();

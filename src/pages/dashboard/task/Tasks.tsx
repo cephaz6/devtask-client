@@ -256,10 +256,8 @@ const Tasks = () => {
       <Card>
         <CardContent className="p-12 text-center">
           <div className="text-6xl mb-4">📝</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No tasks found
-          </h3>
-          <p className="text-gray-600 mb-4">
+          <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
+          <p className="text-gray-400 mb-4">
             {filterStatus === "all"
               ? "Start by creating your first task!"
               : `No tasks with status "${filterStatus.replace("_", " ")}"`}

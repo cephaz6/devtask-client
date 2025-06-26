@@ -189,3 +189,20 @@ export interface RecentActivityItem {
   related_entity_title?: string; // Title of the task/project
   related_entity_id?: string; // ID of the task/project
 }
+
+
+
+// COPILOT Interface
+export type TaskItem = {
+  title: string;
+  description: string;
+  priority: "low" | "medium" | "high";
+  estimated_time: number;
+  due_date: string;
+};
+
+export type GeneratedProject = {
+  title: string;
+  description: string;
+  tasks: TaskItem[];
+};

@@ -4,6 +4,7 @@ import type {
   Project,
   Comment,
   User,
+  GeneratedProject,
   ProjectMember,
   Notification,
   NotificationCreateRequest,
@@ -300,6 +301,15 @@ export const fetchRecentActivities = async (): Promise<
   RecentActivityItem[]
 > => {
   const response = await axios.get("/dashboard/recent-activities");
+  return response.data;
+};
+
+// COPILOT QUERIES
+export const generateTasks = async (
+  prompt: string
+): Promise<GeneratedProject> => {
+  const response = await api.post("/copilot/generate-tasks", { prompt });
+  console.log("Generated Project from LLM:", response.data);
   return response.data;
 };
 
