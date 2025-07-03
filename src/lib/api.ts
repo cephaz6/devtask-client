@@ -313,4 +313,10 @@ export const generateTasks = async (
   return response.data;
 };
 
+export const saveGeneratedProject = async (
+  project: GeneratedProject
+): Promise<void> => {
+  await api.post("/copilot/save-generated-project", project);
+};
+
 export default api;
