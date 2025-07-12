@@ -17,7 +17,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import type { GeneratedProject } from "@/types";
-import { saveGeneratedProject } from "@/lib/api";
+import { fetchProjects, saveGeneratedProject } from "@/lib/api";
 
 import { Dialog } from "@/components/ui/dialog";
 import { DialogTrigger, DialogContent } from "@/components/ui/dialog";
@@ -75,6 +75,7 @@ export function ProjectPreview({ project }: Props) {
     try {
       await saveGeneratedProject(project);
       setOpenDialog(false);
+      await fetchProjects();
       navigate(`/dashboard/projects`);
     } catch (error) {
       console.error("Failed to save project:", error);
