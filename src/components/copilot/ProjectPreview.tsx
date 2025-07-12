@@ -73,7 +73,7 @@ export function ProjectPreview({ project }: Props) {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // const response = await saveGeneratedProject(project);
+      await saveGeneratedProject(project);
       setOpenDialog(false);
       navigate(`/dashboard/projects`);
     } catch (error) {
