@@ -27,6 +27,7 @@ export const setAuthToken = (token: string | null) => {
   }
 };
 
+// --- Auth Queries ---
 export const fetchCurrentUser = async (): Promise<User> => {
   const response = await api.get("/auth/me");
   return response.data;

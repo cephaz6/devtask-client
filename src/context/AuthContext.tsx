@@ -3,7 +3,7 @@ import {
   useContext,
   useEffect,
   useState,
-  type ReactNode,
+  useCallback,
 } from "react";
 import { useNavigate } from "react-router-dom";
 import api, { setAuthToken } from "@/lib/api";
@@ -14,64 +14,61 @@ type AuthContextType = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // ✅ Restore user on app load
-  useEffect(() => {
-    const restoreUser = async () => {
-      const token = localStorage.getItem("token");
-
-      if (token) {
-        try {
-          setAuthToken(token); // attach to axios
-          const res = await api.get("/dashboard/user");
-          setUser(res.data);
-        } catch (err) {
-          console.error("Session restoration failed", err);
-          logout(false); // 👈 prevent redirect on load
-        }
-      }
-
-      setLoading(false); // ✅ done checking
-    };
-
-    restoreUser();
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      const { access_token } = res.data;
-
-      localStorage.setItem("token", access_token);
-      setAuthToken(access_token);
-
-      const userRes = await api.get("/dashboard/user");
-      setUser(userRes.data);
-
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Login failed", err);
-      throw err;
-    }
-  };
-
-  const logout = (redirect: boolean = true) => {
+  const logout = useCallback(() => {
     localStorage.removeItem("token");
     setAuthToken(null);
     setUser(null);
-    if (redirect) navigate("/");
+    navigate("/");
+  }, [navigate]);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await api.get("/dashboard/user");
+      setUser(res.data);
+    } catch {
+      logout();
+    }
+  }, [logout]);
+
+  const restoreUser = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setAuthToken(token);
+      try {
+        await refreshUser();
+      } catch {
+        logout();
+      }
+    }
+    setLoading(false);
+  }, [refreshUser, logout]);
+
+  useEffect(() => {
+    restoreUser();
+  }, [restoreUser]);
+
+  const login = async (email: string, password: string) => {
+    const res = await api.post("/auth/login", { email, password });
+    const { access_token } = res.data;
+
+    localStorage.setItem("token", access_token);
+    setAuthToken(access_token);
+    await refreshUser();
+    navigate("/dashboard");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,3 +1,4 @@
+// src/components/layout/Layout.tsx
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import { AppSidebar } from "./dash-sidebar";
