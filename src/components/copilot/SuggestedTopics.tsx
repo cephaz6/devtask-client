@@ -1,6 +1,4 @@
 import {
-  Code,
-  Database,
   Cpu,
   BarChart3,
   Palette,
