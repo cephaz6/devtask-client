@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Users, Crown, UserRoundCheck } from "lucide-react";
-import type { Project, ProjectMember } from "@/types";
+import type { Project } from "@/types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getUserInitials } from "@/helpers/taskHelpers"; // Reusing existing helper
 
@@ -66,10 +66,9 @@ const ViewProjectMembersDialog: React.FC<ViewProjectMembersDialogProps> = ({
                           member.user?.email ||
                           `User ID: ${member.user_id.slice(-6)}`}
                         {project.owner_id === member.user_id && (
-                          <Crown
-                            className="inline-block h-4 w-4 ml-2 text-yellow-400"
-                            title="Project Owner"
-                          />
+                          <Crown className="inline-block h-4 w-4 ml-2 text-yellow-400">
+                            <title>Project Owner</title>
+                          </Crown>
                         )}
                       </p>
                       <p className="text-sm text-gray-400">

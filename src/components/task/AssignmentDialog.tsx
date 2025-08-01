@@ -52,7 +52,7 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
   });
 
   const assignableMembers = useMemo(() => {
-    if (!rawProjectMembers) return [];
+    if (!Array.isArray(rawProjectMembers)) return [];
     return rawProjectMembers.filter((member) => member.user_id !== taskOwnerId);
   }, [rawProjectMembers, taskOwnerId]);
   // console.log(assignableMembers.user);
@@ -153,7 +153,7 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
               )}
 
               {assignableMembers.length > 0 ? (
-                assignableMembers.map((member: any) => {
+                assignableMembers.map((member: ProjectMember) => {
                   const isAssigned = selectedUserIds.has(member.user_id);
                   const displayName =
                     member.user?.full_name ||
@@ -168,7 +168,7 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
                       <div className="flex items-center gap-3 flex-1">
                         <Avatar className="h-9 w-9">
                           <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
-                            {getUserInitials(member.user?.full_name)}
+                            {getUserInitials(member.user)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">

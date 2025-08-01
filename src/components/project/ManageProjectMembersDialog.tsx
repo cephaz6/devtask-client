@@ -139,10 +139,12 @@ const ManageProjectMembersDialog: React.FC<ManageProjectMembersDialogProps> = ({
                           member.user?.email ||
                           `User ID: ${member.user_id.slice(-6)}`}
                         {project.owner_id === member.user_id && (
-                          <Crown
-                            className="inline-block h-4 w-4 ml-2 text-yellow-400"
+                          <span
+                            aria-label="Project Owner"
                             title="Project Owner"
-                          />
+                          >
+                            <Crown className="inline-block h-4 w-4 ml-2 text-yellow-400" />
+                          </span>
                         )}
                       </p>
                       <p className="text-sm text-gray-400">

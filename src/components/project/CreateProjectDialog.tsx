@@ -1,5 +1,6 @@
 // src/components/project/CreateProjectDialog.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,8 +34,7 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
   const [description, setDescription] = useState("");
   const [errors, setErrors] = useState<{ title?: string }>({});
 
-  // Reset form when dialog opens/closes
-  useState(() => {
+  useEffect(() => {
     if (!open) {
       setTitle("");
       setDescription("");
@@ -54,7 +53,7 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
       return;
     }
 
-    onSubmit({ title, description: description || null }); // Pass null if description is empty
+    onSubmit({ title, description: description || undefined }); // Pass undefined if description is empty
     // Dialog will be closed by parent on successful submission
   };
 
