@@ -164,10 +164,7 @@ const Tasks = () => {
             <div className="flex items-center gap-1">
               <User className="h-3 w-3" />
               {/* Display assigned user's name or owner's name/email - UPDATED */}
-              {task.owner?.full_name ||
-                task.owner?.email ||
-                task.owner_id ||
-                "Unassigned"}
+              {task.owner?.full_name || task.owner?.email || "Unassigned"}
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
@@ -212,10 +209,7 @@ const Tasks = () => {
 
           <div className="text-xs text-gray-500 min-w-20">
             {/* Display assigned user's name or owner's name/email - UPDATED */}
-            {task.owner?.full_name ||
-              task.owner?.email ||
-              task.owner_id ||
-              "Unassigned"}
+            {task.owner?.full_name || task.owner?.email || "Unassigned"}
           </div>
 
           <div className="text-xs text-gray-500 min-w-24">

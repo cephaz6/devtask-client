@@ -3,7 +3,7 @@ import { generateTasks } from "@/lib/api";
 import { SuggestedTopics } from "@/components/copilot/SuggestedTopics";
 import { PromptInput } from "@/components/copilot/PromptInput";
 import { ProjectPreview } from "@/components/copilot/ProjectPreview";
-import { Loader2, Sparkles, Brain, Target, Zap } from "lucide-react";
+import { Loader2, Sparkles, Brain } from "lucide-react";
 import type { GeneratedProject } from "@/types";
 
 export default function Copilot() {

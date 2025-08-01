@@ -36,7 +36,7 @@ const Projects = () => {
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
   const queryClient = useQueryClient();
 
-  function randomInt(min, max) {
+  function randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
