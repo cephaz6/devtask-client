@@ -15,7 +15,7 @@ import {
   getStatusConfig,
   getUserInitials, // Explicitly import getUserInitials
 } from "@/helpers/taskHelpers";
-import type { Task, User } from "@/types";
+import type { Task } from "@/types";
 
 interface TaskDetailsCardProps {
   task: Task;

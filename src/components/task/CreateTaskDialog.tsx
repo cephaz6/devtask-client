@@ -123,7 +123,7 @@ const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
       priority,
       status: initialStatus || "not_started",
       due_date: dueDate?.toISOString(),
-      tags: tags,
+      // tags omitted because we don't have tag IDs for new tags
       estimated_time: parseFloat(estimatedTime),
       actual_time: parseFloat(actualTime),
       project_id: finalProjectId,
@@ -212,11 +212,13 @@ const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
                         </SelectItem>
                         {projects &&
                           Array.isArray(projects) &&
-                          projects.map((proj: any) => (
-                            <SelectItem key={proj.id} value={proj.id}>
-                              {proj.title}
-                            </SelectItem>
-                          ))}
+                          projects.map(
+                            (proj: { id: string; title: string }) => (
+                              <SelectItem key={proj.id} value={proj.id}>
+                                {proj.title}
+                              </SelectItem>
+                            )
+                          )}
                       </>
                     )}
                   </SelectContent>
@@ -252,7 +254,10 @@ const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
             <div>
               <Label className="text-sm font-medium">Priority 🚦</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select
+                value={priority}
+                onValueChange={(val) => setPriority(val as Task["priority"])}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>

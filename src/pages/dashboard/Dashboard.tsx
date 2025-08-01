@@ -439,6 +439,11 @@ const Dashboard: React.FC = () => {
       <CreateProjectDialog
         open={openCreateProject}
         onOpenChange={setOpenCreateProject}
+        onSubmit={() => {
+          // You can implement actual project creation logic here or leave as a placeholder
+          // For now, just close the dialog
+          setOpenCreateProject(false);
+        }}
       />
     </div>
   );
