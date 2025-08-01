@@ -10,7 +10,7 @@ import {
   updateTask,
   deleteTask,
   archiveTask,
-  // updateTaskAssignments,
+  updateTaskAssignments,
 } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,7 +52,7 @@ import TaskDetailsCard from "@/components/task/TaskDetailsCard";
 
 // Import dialog components
 import EditTaskDialog from "@/components/task/EditTaskDialog";
-// import AssignmentDialog from "@/components/task/AssignmentDialog";
+import AssignmentDialog from "@/components/task/AssignmentDialog";
 import DeleteTaskDialog from "@/components/task/DeleteTaskDialog"; // Import the new Delete dialog
 import ShareTaskDialog from "@/components/task/ShareTaskDialog"; // Import the new Share dialog
 
@@ -71,7 +71,7 @@ import {
 
 const TaskPage = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  // const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false);
+  const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -107,7 +107,7 @@ const TaskPage = () => {
   const task: Task | undefined = taskBase
     ? {
         ...taskBase,
-        comments: (commentsWithUsers as CommentResponse[]) || [],
+        comments: commentsWithUsers || [],
       }
     : undefined;
 
@@ -248,22 +248,22 @@ const TaskPage = () => {
     },
   });
 
-  // const updateAssignmentMutation = useMutation<
-  //   Task,
-  //   Error,
-  //   { userIds: string[] }
-  // >({
-  //   mutationFn: ({ userIds }) => updateTaskAssignments(taskId, userIds),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["taskBase", taskId] }); // Invalidate current task to show new assignments
-  //     setAssignmentDialogOpen(false); // Close the dialog
-  //     // TODO: Optionally show a success toast/message
-  //   },
-  //   onError: (err) => {
-  //     console.error("Failed to update assignments:", err);
-  //     // TODO: Display a user-friendly error message
-  //   },
-  // });
+  const updateAssignmentMutation = useMutation<
+    Task,
+    Error,
+    { userIds: string[] }
+  >({
+    mutationFn: ({ userIds }) => updateTaskAssignments(taskId, userIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["taskBase", taskId] }); // Invalidate current task to show new assignments
+      setAssignmentDialogOpen(false); // Close the dialog
+      // TODO: Optionally show a success toast/message
+    },
+    onError: (err) => {
+      console.error("Failed to update assignments:", err);
+      // TODO: Display a user-friendly error message
+    },
+  });
 
   // Dialog handlers - now calling mutations
   const handleEditTask = () => setEditDialogOpen(true);
@@ -274,17 +274,17 @@ const TaskPage = () => {
     // TODO: Implement task duplication logic
     console.log("Duplicate task:", taskId);
   };
-  // const handleManageAssignments = () => {
-  //   // Only open the assignment dialog if the task has a project_id
-  //   if (task?.project_id) {
-  //     setAssignmentDialogOpen(true);
-  //   } else {
-  //     // TODO: Potentially show a toast or alert indicating no project is assigned
-  //     console.warn(
-  //       "Cannot manage assignments: Task is not associated with a project."
-  //     );
-  //   }
-  // };
+  const handleManageAssignments = () => {
+    // Only open the assignment dialog if the task has a project_id
+    if (task?.project_id) {
+      setAssignmentDialogOpen(true);
+    } else {
+      // TODO: Potentially show a toast or alert indicating no project is assigned
+      console.warn(
+        "Cannot manage assignments: Task is not associated with a project."
+      );
+    }
+  };
 
   const handleEditSubmit = (updatedTask: Partial<Task>) => {
     updateTaskMutation.mutate(updatedTask);
@@ -298,9 +298,9 @@ const TaskPage = () => {
     archiveTaskMutation.mutate();
   };
 
-  // const handleAssignmentSubmit = (assignmentData: { userIds: string[] }) => {
-  //   updateAssignmentMutation.mutate(assignmentData);
-  // };
+  const handleAssignmentSubmit = (assignmentData: { userIds: string[] }) => {
+    updateAssignmentMutation.mutate(assignmentData);
+  };
   // --- END MUTATIONS ---
 
   if (!authUser) {
@@ -404,7 +404,7 @@ const TaskPage = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  // onClick={handleManageAssignments}
+                  onClick={handleManageAssignments}
                   // Disable button if no project_id is associated
                   disabled={!task.project_id}
                   title={
@@ -607,7 +607,7 @@ const TaskPage = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          // onClick={handleManageAssignments}
+                          onClick={handleManageAssignments}
                         >
                           <Edit className="h-3 w-3" />
                         </Button>
@@ -723,14 +723,14 @@ const TaskPage = () => {
         isOwner={isOwner}
       />
 
-      {/* <AssignmentDialog
+      <AssignmentDialog
         open={assignmentDialogOpen}
         onOpenChange={setAssignmentDialogOpen}
         task={task} // Keep task for current assignments
         currentProjectId={task?.project_id} // Pass project_id for fetching project members
         onSubmit={handleAssignmentSubmit}
         isSubmitting={updateAssignmentMutation.isPending} // Pass submission state
-      /> */}
+      />
 
       {/* New Delete Confirmation Dialog Component */}
       <DeleteTaskDialog
