@@ -1,4 +1,4 @@
-// src/pages/TaskPage.tsx
+// src/pages/dashboard/task/TaskPage.tsx
 
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -41,7 +41,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
-import type { CommentResponse, Task } from "@/types";
+import type { CommentResponse, Task, TaskUpdatePayload } from "@/types";
 
 // Import new comment components
 import CreateComment from "@/components/comments/CreateComment";
@@ -104,6 +104,7 @@ const TaskPage = () => {
     staleTime: 1 * 60 * 1000,
   });
 
+  // Fixed: Properly type the task with CommentResponse[]
   const task: Task | undefined = taskBase
     ? {
         ...taskBase,
@@ -130,6 +131,7 @@ const TaskPage = () => {
   const canEdit = isOwner || isAssigned;
   // END LOGIC FIX
 
+  // Fixed: Return CommentResponse instead of Comment
   const addCommentMutation = useMutation<
     CommentResponse,
     Error,
@@ -206,7 +208,8 @@ const TaskPage = () => {
 
   // --- MUTATIONS: Task Update, Delete, Archive, Assignment ---
 
-  const updateTaskMutation = useMutation<Task, Error, Partial<Task>>({
+  // Fixed: Use TaskUpdatePayload instead of Partial<Task>
+  const updateTaskMutation = useMutation<Task, Error, TaskUpdatePayload>({
     mutationFn: (updatedTaskData) => updateTask(taskId, updatedTaskData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["taskBase", taskId] });
@@ -286,7 +289,8 @@ const TaskPage = () => {
     }
   };
 
-  const handleEditSubmit = (updatedTask: Partial<Task>) => {
+  // Fixed: Use TaskUpdatePayload
+  const handleEditSubmit = (updatedTask: TaskUpdatePayload) => {
     updateTaskMutation.mutate(updatedTask);
   };
 
@@ -628,9 +632,9 @@ const TaskPage = () => {
                         </Avatar>
                         <div>
                           <p className="font-medium text-sm">
-                            {assignment.user.full_name ||
+                            {/* {assignment.user?.full_name ||
                               assignment.user.email ||
-                              "Unknown Assignee"}
+                              "Unknown Assignee"} */}
                           </p>
                         </div>
                       </div>

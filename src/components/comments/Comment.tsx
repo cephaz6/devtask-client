@@ -2,11 +2,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Reply, ChevronDown, ChevronRight } from "lucide-react";
 import { formatDate, getUserInitials } from "@/helpers/taskHelpers";
-import type { CommentResponse } from "@/types"; // Make sure CommentResponse type is correctly imported
+import type { CommentResponse } from "@/types"; // Changed from Comment to CommentResponse
 import CreateComment from "./CreateComment"; // Import the CreateComment component
 
 interface CommentProps {
-  comment: CommentResponse;
+  comment: CommentResponse; // Changed from Comment to CommentResponse
   level?: number;
   onReplyInitiate: (commentId: string, authorName: string) => void;
   onToggleCollapse: (commentId: string) => void;

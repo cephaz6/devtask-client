@@ -1,8 +1,9 @@
 import axios from "axios";
+// In lib/api.ts, add this import at the top
 import type {
   Task,
   Project,
-  Comment,
+  // CommentResponse, // Changed from Comment
   User,
   GeneratedProject,
   ProjectMember,
@@ -10,6 +11,7 @@ import type {
   NotificationCreateRequest,
   DashboardStats,
   RecentActivityItem,
+  TaskUpdatePayload, // Add this
 } from "@/types";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -177,7 +179,7 @@ export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
 
 export const updateTask = async (
   id: string,
-  taskData: Partial<Task>
+  taskData: TaskUpdatePayload // Changed from Partial<Task>
 ): Promise<Task> => {
   const response = await api.put(`/tasks/${id}`, taskData);
   console.log("Task updated:", response.data);

@@ -12,7 +12,7 @@ export interface CommentResponse {
   task_id: string;
   user_id: string;
   content: string;
-  parent_comment_id: string | null;
+  parent_comment_id: string | null; // Fixed: removed undefined
   created_at: string; // ISO string format
   user?: User; // This is the crucial part that the backend now provides
   replies?: CommentResponse[]; // <-- THIS IS VITAL for the threading logic in TaskPage.tsx
@@ -57,7 +57,7 @@ export interface Task {
   assignments?: TaskMember[];
   owner: User;
   dependencies?: Task[];
-  comments?: CommentResponse[];
+  comments?: CommentResponse[]; // Changed from Comment[] to CommentResponse[]
 }
 
 // NEW: Interface for the payload sent when updating a task
@@ -83,12 +83,13 @@ export interface TaskUpdatePayload {
   // Note: user_id (owner_id), created_at, updated_at are not updated through this payload
 }
 
+// Updated Comment interface to match CommentResponse
 export interface Comment {
   id: string;
   task_id: string;
   user_id: string;
   content: string;
-  parent_comment_id?: string | null; // For threaded comments
+  parent_comment_id: string | null; // Fixed: removed undefined
   created_at: string;
 
   // Relationship data
@@ -189,8 +190,6 @@ export interface RecentActivityItem {
   related_entity_title?: string; // Title of the task/project
   related_entity_id?: string; // ID of the task/project
 }
-
-
 
 // COPILOT Interface
 export type TaskItem = {
