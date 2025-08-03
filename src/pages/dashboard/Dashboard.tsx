@@ -1,8 +1,8 @@
 // src/pages/Dashboard.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { fetchDashboardStats, fetchRecentActivities } from "@/lib/api";
+// import { useQuery } from "@tanstack/react-query";
+// import { fetchDashboardStats, fetchRecentActivities } from "@/lib/api";
 import {
   Card,
   CardContent,
@@ -24,14 +24,14 @@ import {
   LayoutDashboard,
   Activity,
   Calendar,
-  Loader2,
-  Frown,
+  // Loader2,
+  // Frown,
   ArrowUpRight,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import CreateTaskDialog from "@/components/task/CreateTaskDialog";
 import CreateProjectDialog from "@/components/project/CreateProjectDialog";
-import type { DashboardStats, RecentActivityItem } from "@/types";
+// import type { DashboardStats, RecentActivityItem } from "@/types";
 import { getUserInitials } from "@/helpers/taskHelpers";
 
 const Dashboard: React.FC = () => {
@@ -40,31 +40,45 @@ const Dashboard: React.FC = () => {
   const [openCreateTask, setOpenCreateTask] = useState(false);
   const [openCreateProject, setOpenCreateProject] = useState(false);
 
-  // Fetch dashboard stats
-  const {
-    data: dashboardStats,
-    isLoading: isLoadingStats,
-    isError: isErrorStats,
-    error: statsError,
-  } = useQuery<DashboardStats, Error>({
-    queryKey: ["dashboardStats", user?.user_id],
-    queryFn: fetchDashboardStats,
-    enabled: !!user?.user_id,
-    staleTime: 5 * 60 * 1000,
-  });
+  // COMMENTED OUT: Fetch dashboard stats
+  // const {
+  //   data: dashboardStats,
+  //   isLoading: isLoadingStats,
+  //   isError: isErrorStats,
+  //   error: statsError,
+  // } = useQuery<DashboardStats, Error>({
+  //   queryKey: ["dashboardStats", user?.user_id],
+  //   queryFn: fetchDashboardStats,
+  //   enabled: !!user?.user_id,
+  //   staleTime: 5 * 60 * 1000,
+  // });
 
-  // Fetch recent activities
-  const {
-    data: recentActivities,
-    isLoading: isLoadingActivities,
-    isError: isErrorActivities,
-    error: activitiesError,
-  } = useQuery<RecentActivityItem[], Error>({
-    queryKey: ["recentActivities", user?.user_id],
-    queryFn: fetchRecentActivities,
-    enabled: !!user?.user_id,
-    staleTime: 60 * 1000,
-  });
+  // COMMENTED OUT: Fetch recent activities
+  // const {
+  //   data: recentActivities,
+  //   isLoading: isLoadingActivities,
+  //   isError: isErrorActivities,
+  //   error: activitiesError,
+  // } = useQuery<RecentActivityItem[], Error>({
+  //   queryKey: ["recentActivities", user?.user_id],
+  //   queryFn: fetchRecentActivities,
+  //   enabled: !!user?.user_id,
+  //   staleTime: 60 * 1000,
+  // });
+
+  // DUMMY DATA: Replace API data with static dummy data
+  const dashboardStats = {
+    total_tasks: 0,
+    active_projects: 0,
+    pending_assignments: 0,
+    completed_tasks: 0,
+  };
+
+  const recentActivities: any[] = []; // Empty array for no recent activities
+  const isLoadingStats = false;
+  // const isLoadingActivities = false;
+  // const isErrorStats = false;
+  // const isErrorActivities = false;
 
   // Helper to format timestamps
   const formatTimeAgo = (timestamp: string): string => {
@@ -103,7 +117,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Stats configuration
+  // Stats configuration - using dummy data
   const stats = [
     {
       title: "Total Tasks",
@@ -166,7 +180,7 @@ const Dashboard: React.FC = () => {
       title: "View My Assignments",
       description: "See all tasks assigned to you",
       icon: UserCheck,
-      action: () => navigate("/tasks/assigned"),
+      action: () => navigate("/dashboard/tasks"),
       color: "bg-orange-600 hover:bg-orange-700",
     },
   ];
@@ -192,43 +206,43 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  // Unified Loading state
-  if (isLoadingStats || isLoadingActivities) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-gray-100 p-8">
-        <Loader2 className="h-16 w-16 animate-spin text-blue-500 mb-6" />
-        <p className="text-xl text-muted-foreground font-semibold">
-          Loading your personalized dashboard...
-        </p>
-        <p className="text-sm text-gray-500 mt-2">
-          This might take a moment to fetch all your data.
-        </p>
-      </div>
-    );
-  }
+  // COMMENTED OUT: Unified Loading state
+  // if (isLoadingStats || isLoadingActivities) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-gray-100 p-8">
+  //       <Loader2 className="h-16 w-16 animate-spin text-blue-500 mb-6" />
+  //       <p className="text-xl text-muted-foreground font-semibold">
+  //         Loading your personalized dashboard...
+  //       </p>
+  //       <p className="text-sm text-gray-500 mt-2">
+  //         This might take a moment to fetch all your data.
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
-  // Unified Error state
-  if (isErrorStats || isErrorActivities) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-gray-100 p-8">
-        <Frown className="h-16 w-16 text-red-500 mb-6" />
-        <h2 className="text-2xl font-bold text-destructive mb-3">
-          Error Loading Dashboard
-        </h2>
-        <p className="text-muted-foreground text-center max-w-md">
-          Something went wrong while fetching your data:{" "}
-          {(statsError || activitiesError)?.message || "Unknown error"}. Please
-          try refreshing the page or contact support.
-        </p>
-        <Button
-          onClick={() => window.location.reload()}
-          className="mt-6 bg-red-600 hover:bg-red-700"
-        >
-          Retry
-        </Button>
-      </div>
-    );
-  }
+  // COMMENTED OUT: Unified Error state
+  // if (isErrorStats || isErrorActivities) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-gray-100 p-8">
+  //       <Frown className="h-16 w-16 text-red-500 mb-6" />
+  //       <h2 className="text-2xl font-bold text-destructive mb-3">
+  //         Error Loading Dashboard
+  //       </h2>
+  //       <p className="text-muted-foreground text-center max-w-md">
+  //         Something went wrong while fetching your data:{" "}
+  //         {(statsError || activitiesError)?.message || "Unknown error"}. Please
+  //         try refreshing the page or contact support.
+  //       </p>
+  //       <Button
+  //         onClick={() => window.location.reload()}
+  //         className="mt-6 bg-red-600 hover:bg-red-700"
+  //       >
+  //         Retry
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen p-6 sm:p-8 space-y-6 animate-fade-in">
@@ -391,14 +405,14 @@ const Dashboard: React.FC = () => {
                                 activity.type.includes("task")
                               ) {
                                 navigate(
-                                  `/tasks/${activity.related_entity_id}`
+                                  `/dashboard/tasks/${activity.related_entity_id}`
                                 );
                               } else if (
                                 activity.related_entity_id &&
                                 activity.type.includes("project")
                               ) {
                                 navigate(
-                                  `/projects/${activity.related_entity_id}`
+                                  `/dashboard/projects/${activity.related_entity_id}`
                                 );
                               }
                             }}
