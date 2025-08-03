@@ -14,7 +14,7 @@ import { Loader2, UserPlus, Users, Frown, Check, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProjectMembers } from "@/lib/api";
 import { getUserInitials } from "@/helpers/taskHelpers";
-import type { Task, ProjectMember } from "@/types";
+import type { Task, User } from "@/types"; // Changed ProjectMember to User
 
 interface AssignmentDialogProps {
   open: boolean;
@@ -44,7 +44,8 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
     isLoading: isLoadingMembers,
     isError: isErrorMembers,
     error: membersError,
-  } = useQuery<ProjectMember[], Error>({
+  } = useQuery<User[], Error>({
+    // Changed from ProjectMember[] to User[]
     queryKey: ["projectMembers", currentProjectId],
     queryFn: () => fetchProjectMembers(currentProjectId!),
     enabled: !!currentProjectId && open,
@@ -55,7 +56,7 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
     if (!Array.isArray(rawProjectMembers)) return [];
     return rawProjectMembers.filter((member) => member.user_id !== taskOwnerId);
   }, [rawProjectMembers, taskOwnerId]);
-  // console.log(assignableMembers.user);
+
   useEffect(() => {
     if (open && task?.assignments) {
       const newSet = new Set<string>();
@@ -153,12 +154,11 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
               )}
 
               {assignableMembers.length > 0 ? (
-                assignableMembers.map((member: ProjectMember) => {
+                assignableMembers.map((member: User) => {
+                  // Changed from ProjectMember to User
                   const isAssigned = selectedUserIds.has(member.user_id);
                   const displayName =
-                    member.user?.full_name ||
-                    member.user?.email ||
-                    member.user_id;
+                    member.full_name || member.email || member.user_id;
 
                   return (
                     <div
@@ -168,14 +168,15 @@ const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
                       <div className="flex items-center gap-3 flex-1">
                         <Avatar className="h-9 w-9">
                           <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
-                            {getUserInitials(member.user)}
+                            {getUserInitials(member)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <p className="font-medium text-gray-50">
                             {displayName}
                           </p>
-                          <p className="text-sm text-gray-400">{member.role}</p>
+                          <p className="text-sm text-gray-400">Member</p>{" "}
+                          {/* Since we don't have role info, just show Member */}
                         </div>
                       </div>
                       <Button

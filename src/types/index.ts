@@ -83,19 +83,31 @@ export interface TaskUpdatePayload {
   // Note: user_id (owner_id), created_at, updated_at are not updated through this payload
 }
 
-// Updated Comment interface to match CommentResponse
+// Updated Comment interface to match CommentResponse (they should be the same)
 export interface Comment {
   id: string;
   task_id: string;
   user_id: string;
   content: string;
   parent_comment_id: string | null; // Fixed: removed undefined
-  created_at: string;
+  created_at: string; // ISO string format
+  user?: User; // This is the crucial part that the backend now provides
+  replies?: CommentResponse[]; // <-- THIS IS VITAL for the threading logic in TaskPage.tsx
+}
 
-  // Relationship data
-  user?: User; // User who made the comment
-  parent_comment?: Comment | null; // Parent comment for replies
-  replies?: Comment[]; // Child comments/replies
+// Interface specifically for EditTaskDialog props - to bridge the gap
+export interface EditTaskSubmissionData {
+  title?: string;
+  description?: string;
+  status?:
+    | "not_started"
+    | "in_progress"
+    | "pending"
+    | "completed"
+    | "cancelled"
+    | "on_hold";
+  due_date?: string | null; // Send as ISO string
+  tags?: string[]; // For edit dialog, we use string[] to match TaskUpdatePayload
 }
 
 // API request/response types

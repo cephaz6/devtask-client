@@ -3,7 +3,7 @@ import axios from "axios";
 import type {
   Task,
   Project,
-  // CommentResponse, // Changed from Comment
+  CommentResponse, // Changed from Comment
   User,
   GeneratedProject,
   ProjectMember,
@@ -208,13 +208,17 @@ export const updateTaskAssignments = async (
 };
 
 // --- Comment Queries ---
-export const fetchTaskComments = async (taskId: string): Promise<Comment[]> => {
+export const fetchTaskComments = async (
+  taskId: string
+): Promise<CommentResponse[]> => {
   const response = await api.get(`/comments/${taskId}/`);
   console.log("API fetched task comments:", response.data);
   return response.data;
 };
 
-export const fetchCommentById = async (commentId: string): Promise<Comment> => {
+export const fetchCommentById = async (
+  commentId: string
+): Promise<CommentResponse> => {
   const response = await api.get(`/comments/comment/${commentId}`);
   console.log("API fetched single comment:", response.data);
   return response.data;
@@ -224,7 +228,7 @@ export const addTaskComment = async (commentData: {
   task_id: string;
   content: string;
   parent_comment_id?: string | null;
-}): Promise<Comment> => {
+}): Promise<CommentResponse> => {
   const response = await api.post(`/comments`, commentData);
   console.log("API added comment:", response.data);
   return response.data;
@@ -233,7 +237,7 @@ export const addTaskComment = async (commentData: {
 export const updateTaskComment = async (
   commentId: string,
   content: string
-): Promise<Comment> => {
+): Promise<CommentResponse> => {
   const response = await api.put(`/comments/${commentId}`, { content });
   console.log("API updated comment:", response.data);
   return response.data;
