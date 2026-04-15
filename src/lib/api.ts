@@ -51,7 +51,7 @@ export const fetchProjectDetails = async (id: string): Promise<Project> => {
 };
 
 export const createProject = async (
-  projectData: Partial<Project>
+  projectData: Partial<Project>,
 ): Promise<Project> => {
   const response = await api.post("/project", projectData);
   console.log("Project created:", response.data);
@@ -60,7 +60,7 @@ export const createProject = async (
 
 export const updateProject = async (
   id: string,
-  projectData: Partial<Project>
+  projectData: Partial<Project>,
 ): Promise<Project> => {
   const response = await api.put(`/project/${id}`, projectData);
   console.log("Project updated:", response.data);
@@ -73,7 +73,7 @@ export const deleteProject = async (id: string): Promise<void> => {
 };
 
 export const fetchProjectMembers = async (
-  projectId: string
+  projectId: string,
 ): Promise<User[]> => {
   try {
     const response = await api.get(`/project-members/${projectId}/members`);
@@ -94,18 +94,25 @@ export interface ProjectInvitePayload {
 
 // Invite a user to a project by sending the ProjectInvitePayload directly
 export const inviteProjectMember = async (
-  payload: ProjectInvitePayload // The function now explicitly accepts the structured payload
+  payload: ProjectInvitePayload, // The function now explicitly accepts the structured payload
 ): Promise<ProjectMember> => {
   try {
     // Send the entire payload object directly to the backend
     const response = await api.post("/project-members/invite", payload);
     console.log("API invited project member:", response.data);
     return response.data;
-  } catch (error: any) {
-    const errorMessage =
-      error.response?.data?.detail ||
-      error.message ||
-      "An unknown error occurred";
+  } catch (error) {
+    let errorMessage = "An unknown error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (
+      typeof error === "object" &&
+      error !== null &&
+      "response" in error
+    ) {
+      const axiosError = error as { response?: { data?: { detail?: string } } };
+      errorMessage = axiosError.response?.data?.detail || errorMessage;
+    }
     console.error("Error inviting project member:", errorMessage);
     throw new Error(errorMessage);
   }
@@ -114,7 +121,7 @@ export const inviteProjectMember = async (
 export const updateProjectMemberRole = async (
   projectId: string,
   userId: string,
-  newRole: "owner" | "member"
+  newRole: "owner" | "member",
 ): Promise<ProjectMember> => {
   const response = await api.patch("/project-members/role", {
     project_id: projectId,
@@ -128,7 +135,7 @@ export const updateProjectMemberRole = async (
 // Accept invite to project
 export const acceptInvite = async (
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<void> => {
   await api.post("/project-members/accept-invite", {
     project_id: projectId,
@@ -139,7 +146,7 @@ export const acceptInvite = async (
 // Decline project invitation
 export const declineInvite = async (
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<void> => {
   await api.post("/project-members/decline-invite", {
     project_id: projectId,
@@ -149,7 +156,7 @@ export const declineInvite = async (
 
 export const removeProjectMember = async (
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<void> => {
   await api.delete("/project-members/remove", {
     data: { project_id: projectId, user_id: userId },
@@ -181,7 +188,7 @@ export const createTask = async (taskData: Partial<Task>): Promise<Task> => {
 
 export const updateTask = async (
   id: string,
-  taskData: TaskUpdatePayload // Changed from Partial<Task>
+  taskData: TaskUpdatePayload, // Changed from Partial<Task>
 ): Promise<Task> => {
   const response = await api.put(`/tasks/${id}`, taskData);
   console.log("Task updated:", response.data);
@@ -200,7 +207,7 @@ export const archiveTask = async (id: string): Promise<void> => {
 
 export const updateTaskAssignments = async (
   id: string,
-  userIds: string[]
+  userIds: string[],
 ): Promise<Task> => {
   const response = await api.put(`/tasks/assignments/${id}/assignments`, {
     user_ids: userIds,
@@ -211,7 +218,7 @@ export const updateTaskAssignments = async (
 
 // --- Comment Queries ---
 export const fetchTaskComments = async (
-  taskId: string
+  taskId: string,
 ): Promise<CommentResponse[]> => {
   const response = await api.get(`/comments/${taskId}/`);
   console.log("API fetched task comments:", response.data);
@@ -219,7 +226,7 @@ export const fetchTaskComments = async (
 };
 
 export const fetchCommentById = async (
-  commentId: string
+  commentId: string,
 ): Promise<CommentResponse> => {
   const response = await api.get(`/comments/comment/${commentId}`);
   console.log("API fetched single comment:", response.data);
@@ -238,7 +245,7 @@ export const addTaskComment = async (commentData: {
 
 export const updateTaskComment = async (
   commentId: string,
-  content: string
+  content: string,
 ): Promise<CommentResponse> => {
   const response = await api.put(`/comments/${commentId}`, { content });
   console.log("API updated comment:", response.data);
@@ -264,7 +271,7 @@ export const fetchUsers = async (): Promise<User[]> => {
 
 // --- Notification Queries ---
 export const createNotification = async (
-  notificationData: NotificationCreateRequest
+  notificationData: NotificationCreateRequest,
 ): Promise<Notification> => {
   const response = await api.post("/notifications", notificationData);
   console.log("API created notification:", response.data);
@@ -272,7 +279,7 @@ export const createNotification = async (
 };
 
 export const fetchNotifications = async (
-  unreadOnly: boolean = false
+  unreadOnly: boolean = false,
 ): Promise<Notification[]> => {
   const params = unreadOnly ? { unread: true } : {};
   const response = await api.get("/notifications", { params });
@@ -281,7 +288,7 @@ export const fetchNotifications = async (
 };
 
 export const fetchNotificationById = async (
-  notificationId: string
+  notificationId: string,
 ): Promise<Notification> => {
   const response = await api.get(`/notifications/${notificationId}`);
   console.log(`API fetched notification ${notificationId}:`, response.data);
@@ -289,12 +296,12 @@ export const fetchNotificationById = async (
 };
 
 export const markNotificationAsRead = async (
-  notificationId: string
+  notificationId: string,
 ): Promise<Notification> => {
   const response = await api.patch(`/notifications/${notificationId}/read`);
   console.log(
     `API marked notification ${notificationId} as read:`,
-    response.data
+    response.data,
   );
   return response.data;
 };
@@ -315,7 +322,7 @@ export const fetchRecentActivities = async (): Promise<
 
 // COPILOT QUERIES
 export const generateTasks = async (
-  prompt: string
+  prompt: string,
 ): Promise<GeneratedProject> => {
   const response = await api.post("/copilot/generate-tasks", { prompt });
   console.log("Generated Project from LLM:", response.data);
@@ -323,7 +330,7 @@ export const generateTasks = async (
 };
 
 export const saveGeneratedProject = async (
-  project: GeneratedProject
+  project: GeneratedProject,
 ): Promise<void> => {
   await api.post("/copilot/save-generated-project", project);
 };
