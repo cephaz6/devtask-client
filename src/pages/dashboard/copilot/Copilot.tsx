@@ -29,7 +29,6 @@ export default function Copilot() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen  dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <div className="max-w-4xl mx-auto px-6 py-8">
