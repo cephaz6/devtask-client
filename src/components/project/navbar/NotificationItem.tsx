@@ -71,7 +71,7 @@ const NotificationItem = ({ notification }: { notification: Notification }) => {
       toast.success("You have joined the project.");
       setHasAccepted(true);
       setOpen(false);
-    } catch (err) {
+    } catch {
       toast.error("Failed to accept invitation.");
     } finally {
       setLoading(false);
@@ -88,7 +88,7 @@ const NotificationItem = ({ notification }: { notification: Notification }) => {
       await declineInvite(projectId!, user.user_id);
       toast.success("You declined the invitation.");
       setOpen(false);
-    } catch (err) {
+    } catch {
       toast.error("Failed to decline invitation.");
     } finally {
       setLoading(false);

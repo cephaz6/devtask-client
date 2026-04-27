@@ -74,7 +74,15 @@ const Dashboard: React.FC = () => {
     completed_tasks: 0,
   };
 
-  const recentActivities: any[] = []; // Empty array for no recent activities
+  const recentActivities: {
+    id: string | number;
+    type: string;
+    description: string;
+    timestamp: string;
+    actor_name: string;
+    related_entity_id?: string | number;
+    related_entity_title?: string;
+  }[] = [];
   const isLoadingStats = false;
   // const isLoadingActivities = false;
   // const isErrorStats = false;
