@@ -49,7 +49,7 @@ export default function Copilot() {
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             Transform your ideas into structured paths and actionable tasks.
             Just describe what you want to achieve, and I'll create a
-            personalized roadmap for you.
+            personalized roadmap for you
           </p>
         </div>
 
