@@ -125,8 +125,8 @@ export default function Copilot() {
                     Crafting Your Learning Path
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400">
-                    Our AI is analyzing your request and creating a personalized
-                    roadmap...
+                    Please wait, We are analyzing your request and creating a
+                    personalized roadmap.
                   </p>
                 </div>
               </div>
